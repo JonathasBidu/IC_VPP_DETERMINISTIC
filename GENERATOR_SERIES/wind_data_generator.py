@@ -40,7 +40,7 @@ def wind_data_generation(scale: list| np.ndarray, shape: list| np.ndarray, Npoin
     cut_in_speed = float(input('Velocidade de cut_in da turbina(m/s)[2.2]: ') or 2.2)
     cut_out_speed = float(input('Velocidade de cut_out da turbina(m/s)[25.0]: ') or 25.0)
     nom_speed = float(input('Velocidade nominal da turbina(m/s)[12.5]: ') or 12.5)
-    nom_pwr = float(input('Potência nominal da turbina(W)[10MW]: ') or 10*1e6)
+    nom_pwr = float(input('Potência nominal da turbina(W)[1W]: ') or 1)
     Nwtg = int(input('Número de turbinas eólicas[1]: ') or 1)
 
     # Gerar séries temporais de potência eólica

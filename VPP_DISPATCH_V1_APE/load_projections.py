@@ -52,7 +52,7 @@ def projections(data: dict)-> tuple[np.ndarray]:
     start_date = datetime(2023, 1, 1)
 
     # Número de horas sorteadas (já está em begin)
-    selected_date = start_date + timedelta(hours=begin)
+    selected_date = start_date + timedelta(hours = begin)
 
     print(f"\nProjeções iniciadas em {selected_date.strftime('%d/%m/%Y')} às {selected_date.strftime('%H:%M')}\n")
 
@@ -70,7 +70,7 @@ def projections(data: dict)-> tuple[np.ndarray]:
         m, _ = load_hourly_series.shape
         idx = np.random.choice(m)
 
-        p_l[i, :] = load_hourly_series.iloc[idx, begin: end].values / S_base
+        p_l[i, :] = load_hourly_series.iloc[idx, begin: end].values
 
     # Carregamento das projeções das cargas despacháveis
     path_2 = path / 'GENERATED_SERIES' / 'dload_hourly_series.xlsx' # Caminho das cargas despacháveis
@@ -84,7 +84,7 @@ def projections(data: dict)-> tuple[np.ndarray]:
         m, _ = dload_hourly_series.shape
         idx = np.random.choice(m)
 
-        p_dl_ref[i, :] = dload_hourly_series.iloc[idx, begin: end].values / S_base
+        p_dl_ref[i, :] = dload_hourly_series.iloc[idx, begin: end].values
 
     # Carregamento das projeções das usinas solares (FVs)
     # path_3 = path / 'GENERATED_SERIES' / 'PVsystem_hourly_series.xlsx' # Caminho do arquivo das projeções das FVs
@@ -100,7 +100,7 @@ def projections(data: dict)-> tuple[np.ndarray]:
         m, _ = PVsystem_hourly_series.shape
         idx = np.random.choice(m)
 
-        p_pv[i, :] = PVsystem_hourly_series.iloc[idx, begin: end].values / S_base
+        p_pv[i, :] = PVsystem_hourly_series.iloc[idx, begin: end].values
 
     # Carregamento das projeções das usinas eólicas (EOs)
     path_4 = path / 'GENERATED_SERIES' / 'WTGsystem_hourly_series.xlsx' # Caminho do arquivo das projeções das EOs
