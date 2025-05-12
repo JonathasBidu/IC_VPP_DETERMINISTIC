@@ -57,7 +57,7 @@ def ieq_constr(x: np.ndarray, data: dict)-> np.ndarray[np.ndarray]:
     p_bm_rdown = data['p_bm_rdown'] # Potência de rampa de descida das UBTMs
     p_bat_max = data['p_bat_max'] # Potência máxima dos armazenadores
     p_dl_min = data['p_dl_min'] # Potência das cargas despacháveis
-    # p_dl_max = data['p_dl_max'] # Potência das cargas despacháveis
+    p_dl_max = data['p_dl_max'] # Potência das cargas despacháveis
 
     # Decompondo a população inicial em variáveis de decisão para teste
     p_bm, p_chg, p_dch, soc, p_dl, u_bm, u_chg, u_dch, u_dl = decompose(x, data)
@@ -127,7 +127,7 @@ def ieq_constr(x: np.ndarray, data: dict)-> np.ndarray[np.ndarray]:
             bat_constr[k] = u_chg[i, t] + u_dch[i, t] - 1 
             k += 1
     
-    Ndlc = (Ndl * Nt) #+ (Ndl * Nt) # Quantidade de restrições de desigualdade das cargas despacháveis
+    Ndlc = (Ndl * Nt) + (Ndl * Nt) # Quantidade de restrições de desigualdade das cargas despacháveis
     dl_constr = np.zeros(Ndlc) # Vetor de restrições de desigualdade das cargas despacháveis (dl_constr - dload constraints)
     k = 0
     # Calculando as restrições de potência mínima das cargas despacháveis: p_dl_min[i, t] * u_dl[i, t] - p_dl[i, t] <= 0
@@ -136,11 +136,11 @@ def ieq_constr(x: np.ndarray, data: dict)-> np.ndarray[np.ndarray]:
             dl_constr[k] = p_dl_min[i, t] * u_dl[i, t] - p_dl[i, t]
             k += 1
 
-    # # Calculando as restrições de potência máxima das cargas despacháveis: p_dl[i, t] - p_dl_max[i, t] * u_dl[i, t] <= 0
-    # for t in range(Nt):
-    #     for i in range(Ndl):
-    #         dl_constr[k] = p_dl[i, t] - p_dl_max[i, t] * u_dl[i, t]
-    #         k += 1
+    # Calculando as restrições de potência máxima das cargas despacháveis: p_dl[i, t] - p_dl_max[i, t] * u_dl[i, t] <= 0
+    for t in range(Nt):
+        for i in range(Ndl):
+            dl_constr[k] = p_dl[i, t] - p_dl_max[i, t] * u_dl[i, t]
+            k += 1
 
     # Vetor com todas as restrições de desigualdade da VPP
     c_ieq = np.concatenate((bm_constr, bat_constr, dl_constr))

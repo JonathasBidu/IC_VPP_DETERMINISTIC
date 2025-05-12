@@ -49,7 +49,7 @@ def bounds(data: dict)-> tuple[np.ndarray]:
     soc_max = data['soc_max'] # Nível máximo de carga da bateria
 
     # Parâmetro das cargas despacháveis
-    # p_dl_max = data['p_dl_max'] # Potência mínima despachável carga
+    p_dl_max = data['p_dl_max'] # Potência mínima despachável carga
     p_dl_min = data['p_dl_min'] # Potência mínima despachável carga
 
 
@@ -93,7 +93,7 @@ def bounds(data: dict)-> tuple[np.ndarray]:
     # Limite de p_dl
     for t in range(Nt):
         for i in range(Ndl):
-            upper_bounds[k] = 15
+            upper_bounds[k] = p_dl_max[i, t]
             lower_bounds[k] = p_dl_min[i, t]
             k += 1
 

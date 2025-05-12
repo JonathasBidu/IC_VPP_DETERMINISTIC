@@ -46,7 +46,7 @@ def solver(data: dict):
     # Definindo a quantidade de restrições de desigualdades da VPP
     Nbmc =(Nbm * Nt) + (Nbm * Nt) + (Nbm * (Nt - 1)) + (Nbm * (Nt - 1)) # Quantidade de restrições de desigualdade da VPP
     Nbatc = (Nbat * Nt) + (Nbat * Nt) + (Nbat * Nt) # Quantidade de restrições de desigualdade dos armazenadores da VPP
-    Ndlc = (Ndl * Nt) #+ (Ndl * Nt)# Quantidade de restrições de desigualdade das cargas despacháveis da VPP
+    Ndlc = (Ndl * Nt) + (Ndl * Nt)# Quantidade de restrições de desigualdade das cargas despacháveis da VPP
     c_ieq = Nbmc + Nbatc + Ndlc # Total de restrições de desigualdade da VPP
 
     # Obtendo os limites superior (ub) e inferior (lb) das variáveis de decisão

@@ -1,4 +1,3 @@
-from datetime import datetime, timedelta
 from pathlib import Path
 import pandas as pd
 import numpy as np
@@ -27,7 +26,7 @@ import numpy as np
 
 '''
 
-def projections(data: dict)-> tuple[np.ndarray]:
+def projections(data: dict, begin: int, end: int, idx)-> tuple[np.ndarray]:
 
     # Obtendo a pasta mãe
     path = Path(__file__).parent.parent
@@ -39,20 +38,6 @@ def projections(data: dict)-> tuple[np.ndarray]:
     Npv = data['Npv']
     Nwt = data['Nwt']
 
-    # Quantidade de dias no ano
-    max_start_day = (8760 - Nt) // 24
-    begin = np.random.choice(max_start_day) * 24
-    end = begin + Nt  
-
-
-    # Data base: 1º de janeiro de 2023
-    start_date = datetime(2023, 1, 1)
-
-    # Número de horas sorteadas (já está em begin)
-    selected_date = start_date + timedelta(hours = begin)
-
-    print(f"\nProjeções iniciadas em {selected_date.strftime('%d/%m/%Y')} às {selected_date.strftime('%H:%M')}\n")
-
     # Carregamento das projeções das cargas NÃO despacháveis
     path_1 = path / 'GENERATED_SERIES' / 'load_hourly_series.xlsx' # Caminho das cargas NÃO despacháveis
     files = pd.ExcelFile(path_1) # Abas presentes no arquivo .xlsx
@@ -62,9 +47,6 @@ def projections(data: dict)-> tuple[np.ndarray]:
     for i, sheet in enumerate(files.sheet_names):
 
         load_hourly_series = pd.read_excel(path_1, header = None, sheet_name = sheet)
-        m, _ = load_hourly_series.shape
-        idx = np.random.choice(m)
-
         p_l[i, :] = load_hourly_series.iloc[idx, begin: end].values
 
     # Carregamento das projeções das cargas despacháveis
@@ -76,14 +58,12 @@ def projections(data: dict)-> tuple[np.ndarray]:
     for i, sheet in enumerate(files.sheet_names):
 
         dload_hourly_series = pd.read_excel(path_2, header = None, sheet_name = sheet)
-        m, _ = dload_hourly_series.shape
-        idx = np.random.choice(m)
-
         p_dl_ref[i, :] = dload_hourly_series.iloc[idx, begin: end].values
 
     # Carregamento das projeções das usinas solares (FVs)
     # path_3 = path / 'GENERATED_SERIES' / 'PVsystem_hourly_series.xlsx' # Caminho do arquivo das projeções das FVs
 
+    # Carregamento das projeções das usinas solares calculadas pelo PVGIS 
     path_3 = path / 'GENERATED_SERIES' / 'PVGISSystem_hourly_series.xlsx' # Caminho do arquivo das projeções das FVs
     files = pd.ExcelFile(path_3) # Abas presentes no arquivo .xlsx
     p_pv = np.zeros((Npv, Nt)) # Iniciando a variável de potência das FVs
@@ -92,9 +72,6 @@ def projections(data: dict)-> tuple[np.ndarray]:
     for i, sheet in enumerate(files.sheet_names):
 
         PVsystem_hourly_series = pd.read_excel(path_3, header = None, sheet_name = sheet)
-        m, _ = PVsystem_hourly_series.shape
-        idx = np.random.choice(m)
-
         p_pv[i, :] = PVsystem_hourly_series.iloc[idx, begin: end].values
 
     # Carregamento das projeções das usinas eólicas (EOs)
@@ -106,25 +83,22 @@ def projections(data: dict)-> tuple[np.ndarray]:
     for i, sheet in enumerate(files.sheet_names):
                
         WTGsystem_hourly_series = pd.read_excel(path_4, header = None, sheet_name = sheet)
-        m, _ = WTGsystem_hourly_series.shape
-        idx = np.random.choice(m)
-
         p_wt[i, :] = WTGsystem_hourly_series.iloc[idx, begin: end].values
 
     # Carregamento do Preço de Liquidação de Diferenças (PLD)
     path_5 = path / 'GENERATED_SERIES' / 'PLD_hourly_series.csv' # Caminho da projeção de PLD
     PLD_hourly_series = pd.read_csv(path_5, sep = ';', header = None)
     m, _ = PLD_hourly_series.shape
-    idx = np.random.choice(m)
-    tau_pld = PLD_hourly_series.iloc[idx, begin: end].to_numpy() # Inciando a variável de tarifa PLD
+    i = np.random.choice(m)
+    tau_pld = PLD_hourly_series.iloc[i, begin: end].to_numpy() # Inciando a variável de tarifa PLD
 
     # Carregamento das projeções de tarifa da distribuidora
     path_6 = path / 'GENERATED_SERIES' / 'TDist_hourly_series.csv' # Caminho da projeção de tarifa da distribuidora
     TDist_hourly_series = pd.read_csv(path_6, sep = ';', header = None)
     m, _ = TDist_hourly_series.shape
-    idx = np.random.choice(m)
-    tau_dist = TDist_hourly_series.iloc[idx, begin: end].to_numpy() # Iniciando a variável de tarifa da distribuidora
-    tau_dl = 0.15 * TDist_hourly_series.iloc[0, begin: end].to_numpy() # Abatimento de 15% sobre o valor da tarifa
+    i = np.random.choice(m)
+    tau_dist = TDist_hourly_series.iloc[i, begin: end].to_numpy() # Iniciando a variável de tarifa da distribuidora
+    tau_dl = 0.15 * TDist_hourly_series.iloc[i, begin: end].to_numpy() # Abatimento de 15% sobre o valor da tarifa
 
     return p_l, p_pv, p_wt, p_dl_ref, tau_pld, tau_dist, tau_dl
 
@@ -133,17 +107,38 @@ if __name__ == '__main__':
 
     from vpp_initial_data import vpp_data
     from matplotlib import pyplot as plt
+    from datetime import datetime, timedelta
 
     # Obtendo os parâmetros iniciais da VPP
     data = vpp_data()
     data['Nt'] = 24
+    Nt = data['Nt']
     Nl = data['Nl']
     Npv = data['Npv']
     Nwt = data['Nwt']
     Ndl = data['Ndl']
 
+    # Constantes
+    Npoints = 8760  # Total de horas no ano
+    base_year = 2013 # Ano base das séries históricas
+
+    # Quantidade máxima de dias 
+    max_start_day = (Npoints - Nt) // 24
+
+    # Sorteio dos parâmetros
+    begin = np.random.randint(0, max_start_day) * 24
+    end = begin + Nt
+    idx = np.random.choice(11)
+    year = base_year + idx
+
+    # Cálculo da data/hora
+    selected_date = datetime(year, 1, 1) + timedelta(hours = begin)
+
+    # Print informativo
+    print(f"Início da simulação em: {selected_date.strftime('%d/%m/%Y')} às {selected_date.strftime('%H:%M')}")
+
     # Obtendo as projeções temporais iniciais
-    p_l, p_pv, p_wt, p_dl_ref, tau_pld, tau_dist, tau_dl = projections(data)
+    p_l, p_pv, p_wt, p_dl_ref, tau_pld, tau_dist, tau_dl = projections(data, begin, end, idx)
 
     # Visualização das projeções iniciais
     # Carga NÃO despacháveis
