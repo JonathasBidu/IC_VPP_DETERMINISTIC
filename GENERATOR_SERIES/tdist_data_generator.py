@@ -1,60 +1,72 @@
 import numpy as np
 
-# Este script gera tarifas de energia para distribuidora e consumidores
-# Premissas:
-    # Periodização horaria
-    # Hora zero - 1o. registo dos dados
-    # Desconsidera feriados e finais de semana
-    # Horario de Ponta: 18h - 20h59 (dias uteis de segunda a sexta)
-    # Horario Intermediário: 16h - 17h59 e 21h - 21h59h
-    # Horario Fora de Ponta: 22h - 15h59h
-    # Fonte: https://www.reclameaqui.com.br/enel-distribuicao-rio/tarifa-branca_tXRUzcJG6p-KOBAL/
-    # Valor Enel Março 21
-        # PONTA = R$1.33333
-        # INTERMEDIÁRIA = R$0.88020
-        # FORA PONTA = R$0.57060
+"""
+    Script para geração da série horária de tarifas de energia da distribuidora (TDist).
+    
+    Premissas:
+    - Tarifas com periodização horária (tarifa branca)
+    - Considera dias úteis apenas (sem diferenciação para finais de semana ou feriados)
+    - Horários definidos conforme padrão da Enel (março de 2021):
+        - Ponta: 18h00 às 20h59
+        - Intermediário: 16h00 às 17h59 e 21h00 às 21h59
+        - Fora de Ponta: 22h00 às 15h59
+    - Valores das tarifas:
+        - Ponta: R$1,33333/kWh
+        - Intermediária: R$0,88020/kWh
+        - Fora de Ponta: R$0,57060/kWh
+    
+    Fonte: https://www.reclameaqui.com.br/enel-distribuicao-rio/tarifa-branca_tXRUzcJG6p-KOBAL/
+"""
 
 def tdist_generator():
-
-    horas_ano = 8760 # total de horas
+    """
+    Gera uma série horária de tarifas da distribuidora (TDist) para um ano inteiro (8760 horas).
+    """
+    horas_ano = 8760  # Total de horas em um ano (365 dias x 24h)
+    
+    # Inicializa vetor de zeros para armazenar as tarifas por hora
     TDist_hourly_series = np.zeros(horas_ano)
-    horas_dia = 24
 
+    # Valores das tarifas (em R$/kWh)
     PONTA = 1.33333
     INTERMEDIARIA = 0.88020
     FORA_PONTA = 0.57060
 
-
-    # Gerar a série horária de tarifas
+    # Loop ao longo de cada hora do ano
     for t in range(horas_ano):
-        h = t % 24  # Obter a hora do dia (0 - 23)
+        h = t % 24  # Determina a hora do dia (0 a 23), com base no índice t
+
+        # Define a tarifa de acordo com o horário
         if 0 <= h < 16:
-            TDist_hourly_series[t] = FORA_PONTA
+            tarifa = FORA_PONTA
         elif 16 <= h < 18:
-            TDist_hourly_series[t] = INTERMEDIARIA
+            tarifa = INTERMEDIARIA
         elif 18 <= h < 21:
-            TDist_hourly_series[t] = PONTA
+            tarifa = PONTA
         elif 21 <= h < 22:
-            TDist_hourly_series[t] = INTERMEDIARIA
+            tarifa = INTERMEDIARIA
         else:
-            TDist_hourly_series[t] = FORA_PONTA
-    
-    TDist_hourly_series = TDist_hourly_series.reshape((1, horas_ano))
+            tarifa = FORA_PONTA
 
-    return TDist_hourly_series
+        # Armazena o valor da tarifa no vetor
+        TDist_hourly_series[t] = tarifa
 
+    # Retorna o vetor como matriz de 1 linha e 8760 colunas
+    return TDist_hourly_series.reshape((1, horas_ano))
+
+
+# Executa a função principal quando o script for executado diretamente
 if __name__ == '__main__':
-
     from pathlib import Path
     import pandas as pd
 
-    save_path = Path(__file__).parent.parent / 'GENERATED_SERIES' / 'TDist_hourly_series.csv'
+    # Define o caminho do arquivo de saída na pasta 'GENERATED_SERIES'
+    save_path = (Path(__file__).parent.parent / 'GENERATED_SERIES' / 'TDist_hourly_series.csv').resolve()
 
+    # Gera a série de tarifas
     TDist_hourly_series = tdist_generator()
 
-    # Salvar o DataFrame em um arquivo CSV, Excel ou outro formato
-    TDist_hourly_series_df = pd.DataFrame(TDist_hourly_series)
-    TDist_hourly_series_df.to_csv(save_path, sep = ';', index = False, header = None)
+    # Salva a série como arquivo CSV (valores separados por ponto e vírgula, sem cabeçalho ou índice)
+    pd.DataFrame(TDist_hourly_series).to_csv(save_path, sep=';', index=False, header=False)
 
-    print('FIM')
- 
+    print('Série horária de tarifas salva com sucesso.')

@@ -2,11 +2,21 @@ import numpy as np
 from sklearn.neural_network import MLPRegressor
 from sklearn.metrics import mean_squared_error
 
-'''
-    Esta função constrói um previsor de séries temporais. São utilizados como dados de entrada os valores y(t), y(t-p) e como saída o valor y(t+1). O algorítmo também permite definir o parâmetro p e retorna o modelo Mdl, o parâmetro p e as séries observadas Y e estimada Yhat.
-'''
+"""
+    Função para construção de um modelo preditivo usando uma Rede Neural do tipo MLP (Multi-Layer Perceptron)
+    para séries temporais.
 
-def generate_MPL(Z: list)-> tuple:
+    Parãmetros:
+        - Z: Lista ou vetor 1D com a série temporal.
+        - p: Número de defasagens (lags) a serem usadas como entrada. Default: 2
+
+    Retorno:
+        - p: Lag utilizado
+        - model: Objeto MLP treinado
+        - Y: Série original (a partir da posição p)
+        - Yhat: Série predita pelo modelo
+"""
+def generate_MLP(Z: list)-> tuple:
 
     while True:
         p = input('Insira o número de lags ou tecle enter para 2: ')
@@ -64,8 +74,8 @@ def generate_MPL(Z: list)-> tuple:
                         max_iter = 10000,
                         learning_rate = 'adaptive',
                         learning_rate_init = 0.01,
-                        tol = 0.0001,
-                        alpha = 0.0001
+                        tol = 1e-4,
+                        alpha = 1e-4
                         # verbose = True
                         )
     

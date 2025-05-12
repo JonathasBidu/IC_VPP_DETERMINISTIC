@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from pathlib import Path
-from generate_MPLRegressor import generate_MPL
+from generate_MPLRegressor import generate_MLP
 
 """
     Script para geração de séries sintéticas de carga elétrica com base em dados históricos reais.
@@ -40,7 +40,7 @@ def load_data():
     hourly_tsdata = load_tsdata[::4]
 
     # Geração do modelo de previsão usando MLP
-    p, mdl, Y, Yhat = generate_MPL(hourly_tsdata)
+    p, mdl, Y, Yhat = generate_MLP(hourly_tsdata)
 
     # Definindo o número de pontos de previsão
     Npoints = 8760
@@ -54,6 +54,7 @@ def load_data():
         pred_hourly_tsdata[p: T] = Yhat
 
     t = T
+    # Geração recursiva da série além do histórico conhecido
     while t < Npoints:
         aux = np.array(pred_hourly_tsdata[t - p: t])
         aux = aux.reshape(-1, p)
