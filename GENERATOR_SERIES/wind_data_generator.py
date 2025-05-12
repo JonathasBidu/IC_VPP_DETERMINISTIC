@@ -210,6 +210,7 @@ if __name__ == '__main__':
                 name = 'Angra dos Reis'
 
             WTG_horly_series = wind_data_generation(scale, shape, Npoints, n)
+            WTG_horly_series = WTG_horly_series / np.max(WTG_horly_series, axis=1, keepdims=True)
             WTG_horly_series_df = pd.DataFrame(WTG_horly_series)
             WTG_horly_series_df.to_excel(writer, sheet_name = name, header = None, index = False)
     

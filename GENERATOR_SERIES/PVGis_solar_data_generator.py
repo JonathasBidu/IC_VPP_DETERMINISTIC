@@ -20,9 +20,8 @@ from matplotlib import pyplot as plt
 
     Essa rotina é útil para análises sazonais, comparações interanuais de produção e estudos de integração com o sistema elétrico.
 '''
-# A Potência de Base 1kVA 
-S_base = 1e3
 
+# Obtendo a pasta mãe 
 path = Path(__file__).parent
 
 # Obtendo o caminho das séries PVGIS
@@ -37,11 +36,11 @@ tsdata_buzios = pd.read_csv(path_2, sep = ',', skiprows = 10, nrows = 96360)
 tsdata_iguaba = pd.read_csv(path_3, sep = ',', skiprows = 10, nrows = 96360)
 tsdata_itaocara = pd.read_csv(path_4, sep = ',', skiprows = 10, nrows = 96360)
 
-# Obtendo apenas a coluna de Potência da série calculada pelo PVGIS
-tsdata_angra = tsdata_angra['P'] / S_base
-tsdata_buzios = tsdata_buzios['P'] / S_base
-tsdata_iguaba = tsdata_iguaba['P'] / S_base
-tsdata_itaocara = tsdata_itaocara['P'] / S_base
+# Obtendo apenas a coluna de Potência da série
+tsdata_angra = tsdata_angra['P'] 
+tsdata_buzios = tsdata_buzios['P']
+tsdata_iguaba = tsdata_iguaba['P']
+tsdata_itaocara = tsdata_itaocara['P']
 
 # Quantidade de horas no ano (Npoints) e quantidade anos (Ns)
 Npoints = 8760
@@ -58,10 +57,16 @@ for t in range(Ns):
 
     begin = t * Npoints 
     end = (t + 1) * Npoints 
-    PVSystem_hourly_series_iguaba[t, :] = tsdata_iguaba[begin: end]
     PVSystem_hourly_series_angra[t, :] = tsdata_angra[begin: end]
-    PVSystem_hourly_series_itaocara[t, :] = tsdata_itaocara[begin: end]
     PVSystem_hourly_series_buzios[t, :] = tsdata_buzios[begin: end]
+    PVSystem_hourly_series_iguaba[t, :] = tsdata_iguaba[begin: end]
+    PVSystem_hourly_series_itaocara[t, :] = tsdata_itaocara[begin: end]
+
+# Normalizando as matrizes em cada linha pelo seu valor de pico
+PVSystem_hourly_series_angra = PVSystem_hourly_series_angra / np.max(PVSystem_hourly_series_angra, axis = 1, keepdims = True)
+PVSystem_hourly_series_buzios = PVSystem_hourly_series_buzios / np.max(PVSystem_hourly_series_buzios, axis = 1, keepdims = True)
+PVSystem_hourly_series_iguaba = PVSystem_hourly_series_iguaba / np.max(PVSystem_hourly_series_iguaba, axis = 1, keepdims = True)
+PVSystem_hourly_series_itaocara = PVSystem_hourly_series_itaocara / np.max(PVSystem_hourly_series_itaocara, axis = 1, keepdims = True)
 
 # Plotagem de uma linha das matrizes para verificação dos dados
 fig, ax = plt.subplots(ncols = 2, nrows = 2, figsize = (12, 7))

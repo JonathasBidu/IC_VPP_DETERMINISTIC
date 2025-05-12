@@ -113,7 +113,7 @@ if __name__ == '__main__':
     with pd.ExcelWriter(save_path) as writer:
         for i in range(N):
             load_hourly_tsdata = load_data()
-            load_hourly_tsdata = load_hourly_tsdata / np.max(load_hourly_tsdata)
+            load_hourly_tsdata = load_hourly_tsdata / np.max(load_hourly_tsdata, axis = 1, keepdims = True)
             load_hourly_series_df = pd.DataFrame(load_hourly_tsdata)
             load_hourly_series_df.to_excel(writer, sheet_name=f'Carga {i + 1}', header=None, index=False)
 

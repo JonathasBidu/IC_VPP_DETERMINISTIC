@@ -29,10 +29,7 @@ import numpy as np
 
 def projections(data: dict)-> tuple[np.ndarray]:
 
-    # Base em pu da potência aparente
-    S_base = 1e6
-
-    # Obtendo a ierarquia do caminho das projeções iniciais
+    # Obtendo a pasta mãe
     path = Path(__file__).parent.parent
 
     # Obtendo os parâmetros iniciais da VPP
@@ -55,8 +52,6 @@ def projections(data: dict)-> tuple[np.ndarray]:
     selected_date = start_date + timedelta(hours = begin)
 
     print(f"\nProjeções iniciadas em {selected_date.strftime('%d/%m/%Y')} às {selected_date.strftime('%H:%M')}\n")
-
-
 
     # Carregamento das projeções das cargas NÃO despacháveis
     path_1 = path / 'GENERATED_SERIES' / 'load_hourly_series.xlsx' # Caminho das cargas NÃO despacháveis
@@ -114,7 +109,7 @@ def projections(data: dict)-> tuple[np.ndarray]:
         m, _ = WTGsystem_hourly_series.shape
         idx = np.random.choice(m)
 
-        p_wt[i, :] = WTGsystem_hourly_series.iloc[idx, begin: end].values / S_base
+        p_wt[i, :] = WTGsystem_hourly_series.iloc[idx, begin: end].values
 
     # Carregamento do Preço de Liquidação de Diferenças (PLD)
     path_5 = path / 'GENERATED_SERIES' / 'PLD_hourly_series.csv' # Caminho da projeção de PLD
