@@ -8,8 +8,8 @@ import numpy as np
         - (x:np.ndarray): vetor de variáveis de decisões otimizadas pelo otimizador (GA). (p_bm, p_chg, p_dch, soc, p_dl, u_bm, u_chg, u_dch, u_dl):
 
             - p_bm: Potência das usinas de geração à biomassa (UBTMs), shape (Nbm, Nt);
-            - p_chg: Potência de carregamento dos armazenadores da VPP, shape (Nbat, Nbm);
-            - p_dch: Potência de descarregamento dos armazenadores da VPP, shape (Nbat, Nbm);
+            - p_chg: Potência de carregamento dos armazenadores da VPP, shape (Nbat, Nt);
+            - p_dch: Potência de descarregamento dos armazenadores da VPP, shape (Nbat, Nt);
             - soc: Nível de energia dos armazenadores da VPP, shape (Nbat, Nt);
             - p_dl: Potência de cargas despacháveis da VPP, shape (Ndl, Nt);
             - u_bm: Estado das UBTMs da VPP, shape (Nbm, Nt);
@@ -37,7 +37,7 @@ import numpy as np
 
 """
 
-def decompose(x: np.ndarray, data: dict)-> tuple[np.ndarray]:
+def decompose(x: np.ndarray, data: dict)-> tuple[np.ndarray, ...]:
 
     # Parâmetros iniciais de VPP
     Nt = data['Nt'] # Período de simulação da VPP

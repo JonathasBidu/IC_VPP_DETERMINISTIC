@@ -29,13 +29,11 @@ from decompose_vetor import decompose
 
     - Retorna c_eq: -> np.ndarray
         c_eq: Vetor contendo todas as restrições de igualdade da VPP;
-            - pwr_blc_constr: Vetor de restrições de igualdades do balanço de potência da VPP;
-            - simult_constr: Vetor de restrições de simultaneidade de importação/exportação da VPP;
             - soc_constr: Vetor de restrições de igualdade do estado de carga da bateria;
 
 """
 
-def eq_constr(x: np.ndarray, data: dict)-> np.ndarray:
+def eq_constr(x: np.ndarray, data: dict) -> np.ndarray:
 
     # Parâmetros iniciais da VPP:
     Nt = data['Nt'] # Período da simulação

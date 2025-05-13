@@ -190,6 +190,7 @@ if __name__ == '__main__':
     plt.plot(tau_pld)
     plt.title('Preço de Liquidação de Diferença')
     plt.xlabel('Hora')
+    plt.ylabel('MW/H')
     plt.show()
         
     # Plotagem da projeção da Tarifa da distribuição e da compensação para o usuário
@@ -198,4 +199,6 @@ if __name__ == '__main__':
     plt.plot(tau_dist, 'b')
     plt.plot(tau_dl, 'r')
     plt.legend(['Dist', 'Desc 15%'])
+    plt.xlabel('Hora')
+    plt.ylabel('kW/H')
     plt.show()

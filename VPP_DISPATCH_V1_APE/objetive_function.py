@@ -41,8 +41,12 @@ import numpy as np
         - fval: O lucro obtido na operação da VPP(Virtual Power Plant)
 """
 
-def obj_function(x, vpp_data):
+def obj_function(x, vpp_data) -> np.float64:
 
+    # Definindo a potência aparente base (1MVA)
+    S_base = 1E6
+
+    # Dados e projeções iniciais da VPP
     Nt = vpp_data['Nt']
     Nbm = vpp_data['Nbm']
     Ndl = vpp_data['Ndl']
@@ -65,10 +69,9 @@ def obj_function(x, vpp_data):
     # Decompondo o vetor x em suas variáveis 
     p_bm, p_chg, p_dch, soc, p_dl, u_bm, u_chg, u_dch, u_dl = decompose(x, vpp_data)
         
-    # Potência líquida
+    # Calculando a Potência líquida
     p_liq = np.zeros(Nt)
     for t in range(Nt):
-    # k = k + 1
         for i in range(Npv):
             p_liq[t] += p_pv[i, t]
         for i in range(Nwt):
@@ -82,20 +85,27 @@ def obj_function(x, vpp_data):
         for i in range(Nbat):            
             p_liq[t] -= p_chg[i, t] * u_chg[i, t] + p_dch[i, t] * u_dch[i, t]
     
+    # Obtendo a potência exportada e a potência importada
     p_exp = np.maximum(0, p_liq) 
     p_imp = np.maximum(0, -p_liq)
+
+    # Normalizando as tarifas da distribuidora, PLD e de compensação para p.u./h
+    tau_pld_pu = tau_pld / S_base
+    tau_dist_pu = tau_dist / S_base
+    tau_dl_pu = tau_dl / S_base
+
 
     # Receita com excedente de energia
     R = 0
     for t in range(Nt):
-        R += p_exp[t] * tau_pld[t]
+        R += p_exp[t] * tau_pld_pu[t]
 
     # Despesa com importação de energia com a comportação de energia
     D = 0
     
     # Importação de energia da distribuidora
     for t in range(Nt):
-        D += p_imp[t] * tau_dist[t]
+        D += p_imp[t] * tau_dist_pu[t] 
 
     # Custos de geração solar fotovoltaica
     Cpv = 0
@@ -107,7 +117,7 @@ def obj_function(x, vpp_data):
     Cwt = 0
     for t in range(Nt):
         for i in range(Nwt):
-            Cwt += p_wt[i, t] + 2 * kappa_wt[i]
+            Cwt += p_wt[i, t] * kappa_wt[i]
 
     # Custos de geração biomassa (custo linear)
     Cbm = 0
@@ -116,21 +126,28 @@ def obj_function(x, vpp_data):
             Cbm += p_bm[i, t] * u_bm[i, t] * kappa_bm[i]
 
     #  custo de partida
-    for t in range(1, Nt):
+    # for t in range(1, Nt):
+    #     for i in range(Nbm):
+    #         Cbm += (u_bm[i, t] - u_bm[i, t - 1]) * kappa_bm_start[i]
+
+    # Custo de partida da biomassa (ligando de 0 → 1)
+    for t in range(1, Nt):  # começa de 1 para ter t-1
         for i in range(Nbm):
-            Cbm += (u_bm[i, t] - u_bm[i, t - 1]) * kappa_bm_start[i]
+            if u_bm[i, t] > u_bm[i, t - 1]:
+                Cbm += kappa_bm_start[i]
+
 
     # Custo de controle carga despachada
     Cdl = 0
     for t in range(Nt):
         for i in range(Ndl):
-            Cdl += p_dl[i, t] * u_dl[i, t] * tau_dl[t]
+            Cdl += p_dl[i, t] * u_dl[i, t] * tau_dl_pu[t]
 
     # Custo da bateria
     Cbat = 0
     for t in range(Nt):
         for i in range(Nbat):
-            Cbat += ((p_chg[i, t] * u_chg[i, t] + p_dch[i, t] * u_dch[i, t]) * kappa_bat[i])
+            Cbat += (p_chg[i, t] * u_chg[i, t] + p_dch[i, t] * u_dch[i, t]) * kappa_bat[i]
 
     # Despesa total
     D = D + Cpv + Cwt + Cbm + Cdl + Cbat
@@ -138,6 +155,7 @@ def obj_function(x, vpp_data):
     
     return fval
 
+# Test de uso
 if __name__ == '__main__':
 
     from vpp_initial_data import vpp_data

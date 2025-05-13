@@ -1,14 +1,61 @@
 from pathlib import Path
 import pandas as pd
 import numpy as np
+
 # Script com os dados gerais da VPP 1
 # Adaptado de zhou2016_Optimal scheduling of virtual power plant with
 # battery degradation cost
+'''
+    Este script contém os dados gerais de uma Virtual Power Plant (VPP) e gera um arquivo CSV com as informações de entrada para a simulação de operação de uma VPP.
 
+    -> Estrutura de Dados:
+        - Nbm: Número de usinas de biomassa.
+        - p_bm_min: Potência mínima das usinas de biomassa (MW).
+        - p_bm_max: Potência máxima das usinas de biomassa (MW).
+        - p_bm_rup: Potência de ramp-up das usinas de biomassa (MW).
+        - p_bm_rdown: Potência de ramp-down das usinas de biomassa (MW).
+        - kappa_bm: Custo de operação das usinas de biomassa (R$/kWh).
+        - kappa_bm_start: Custo de partida das usinas de biomassa (R$/kWh).
+
+    - Npv: Número de usinas fotovoltaicas.
+    - kappa_pv: Custo de operação das usinas fotovoltaicas (R$/kWh).
+
+    - Nwt: Número de usinas eólicas.
+    - kappa_wt: Custo de operação das usinas eólicas (R$/kWh).
+
+    - Nbat: Número de sistemas de armazenamento de energia.
+    - eta_chg: Eficiência do sistema de armazenamento durante o carregamento (%).
+    - eta_dch: Eficiência do sistema de armazenamento durante a descarga (%).
+    - soc_min: Nível mínimo de carga das baterias (%).
+    - soc_max: Nível máximo de carga das baterias (%).
+    - p_bat_max: Potência máxima das baterias (MW).
+    - kappa_bat: Custo de operação das baterias (R$/kWh).
+
+    - Ndl: Número de cargas despacháveis.
+    - Nl: Número de cargas não despacháveis.
+
+    -> Objetivo:
+        A função `vpp_data()` cria um dicionário `vpp_data` contendo os parâmetros gerais da VPP, converte esses dados em um `DataFrame` e salva o arquivo CSV com esses parâmetros. 
+
+    -> Parâmetros de Entrada:
+        Nenhum parâmetro é requerido diretamente pela função.
+
+    -> Saída:
+        - vpp_data (dict): Dicionário contendo todos os parâmetros de configuração da VPP.
+        - Um arquivo CSV chamado "VPPDATA.csv" é gerado no mesmo diretório do script, contendo os dados da VPP.
+
+    -> Observações:
+        - A função `vpp_data()` cria e salva os parâmetros da VPP no formato CSV para facilitar o carregamento e simulação em outros módulos do projeto.
+        - Os custos de operação das usinas de biomassa, fotovoltaicas, eólicas e de baterias são valores arbitrários definidos no script.
+
+'''
+
+# Caminho para salvar o arquivo CSV
 path = Path(__file__).parent / 'VPPDATA.csv'
 
 def vpp_data():
 
+     # Dicionário com os dados da VPP
     vpp_data = {}
 
     #  dados usina biomassa
@@ -44,6 +91,7 @@ def vpp_data():
     # dados cargas nao despachaveis
     vpp_data['Nl'] = 3
     
+    # Convertendo o dicionário para um DataFrame e salvando no arquivo CSV
     keys = [ i for i in vpp_data.keys()] # Uso de List Comprehesion para criação de um vetor chaves
     values = [i for i in vpp_data.values()] # Uso de List Comprehesion para a criaçõa de um vetor valores
     VPP_DATA = list(zip(keys, values)) # Utilizando a função zip para unir as duas listas

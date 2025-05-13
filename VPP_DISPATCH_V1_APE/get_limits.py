@@ -30,7 +30,7 @@ import numpy as np
         - lower_bonds: Vetor de limites inferiores das variáveis de decisão        
 '''
 
-def bounds(data: dict)-> tuple[np.ndarray]:
+def bounds(data: dict)-> tuple[np.ndarray, np.ndarray]:
 
     # Parâmetros iniciais da VPP
     Nt = data['Nt'] # Período da simulação da VPP
@@ -49,12 +49,13 @@ def bounds(data: dict)-> tuple[np.ndarray]:
     soc_max = data['soc_max'] # Nível máximo de carga da bateria
 
     # Parâmetro das cargas despacháveis
-    p_dl_max = data['p_dl_max'] # Potência mínima despachável carga
+    p_dl_max = data['p_dl_max'] # Potência máxima despachável carga
     p_dl_min = data['p_dl_min'] # Potência mínima despachável carga
 
-
     # Definindo a quantidade de variáveis reais (Nr) e inteiras (Ni)
+    # p_bm, p_chg, p_dch, soc, p_dl
     Nr =  (Nt * Nbm) + (Nt * Nbat) + (Nbat * Nt) + (Nt * Nbat) + (Nt * Ndl)
+    # u_bm, u_chg, u_dch, u_dl
     Ni = (Nt * Nbm) + (Nt * Nbat) + (Nt * Nbat) + (Nt * Ndl)
 
     # Iniciando os vetores limitadores superior e inferior das variáveis de decisão
@@ -97,7 +98,6 @@ def bounds(data: dict)-> tuple[np.ndarray]:
             lower_bounds[k] = p_dl_min[i, t]
             k += 1
 
-
     # u_bm, u_chg, u_dch, u_dl: upper_bounds = 1 and lower_bounds = 0
 
     return upper_bounds, lower_bounds
@@ -119,12 +119,12 @@ if __name__ == '__main__':
     Nbat = data['Nbat']
 
     # Definindo a quantidade de variáveis reais (Nr) e variáveis inteiras (Ni)
-    # p_bm, gamma_bm, p_chg, p_dch, p_dl
+    # p_bm, p_chg, p_dch, soc, p_dl
     Nr = (Nt * Nbm) + (Nt * Nbat) + (Nbat * Nt) + (Nt * Nbat) + (Nt * Ndl)
     # u_bm, u_chg, u_dch, u_dl
     Ni = (Nt * Nbm) + (Nt * Nbat) + (Nt * Nbat) + (Nt * Ndl)
 
-    # Gerando um poppulação inicial para teste
+    # Gerando um população inicial para teste
     x = np.random.rand(Nr + Ni)
 
     # Decompondo a população em variáveis de decisão
@@ -141,14 +141,12 @@ if __name__ == '__main__':
     data['u_dch'] = u_dch
     data['u_dl'] = u_dl
 
-
     # Obtendo as projeções temporais iniciais
     path = Path(__file__).parent / 'scenarios_with_PVGIS.pkl'
     cenarios = import_scenarios_from_pickle(path)
 
     # Acrescentando as projeções ao dicionário data
     for cenario in cenarios:
-
 
         data['p_dl_max'] = cenario['p_dl_ref'] + cenario['p_dl_ref'] * 0.2
         data['p_dl_min'] = cenario['p_dl_ref'] - cenario['p_dl_ref'] * 0.2
@@ -158,3 +156,4 @@ if __name__ == '__main__':
 
     print(f'upper_bounds shape {upper_bounds.shape} and types {type(upper_bounds)}\n{upper_bounds}\n')
     print(f'lower_bounds shape {lower_bounds.shape} and types {type(lower_bounds)}\n')
+    

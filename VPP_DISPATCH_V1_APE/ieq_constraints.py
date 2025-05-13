@@ -42,7 +42,7 @@ from decompose_vetor import decompose
             - dl_constr: Vetor contendo as restrições de desigualdade das cargas despacháveis da VPP em cada instante t no período da simulação NT;
 '''
 
-def ieq_constr(x: np.ndarray, data: dict)-> np.ndarray[np.ndarray]:
+def ieq_constr(x: np.ndarray, data: dict)-> np.ndarray:
 
     # Parâmetros iniciais da VPP
     Nt = data['Nt'] # Período da simulação
@@ -52,8 +52,6 @@ def ieq_constr(x: np.ndarray, data: dict)-> np.ndarray[np.ndarray]:
     p_bm_min = data['p_bm_min'] # Potênica Mínima das UBTMs
     p_bm_max = data['p_bm_max'] # Potênca máxima das UBTMs
     p_bm_rup = data['p_bm_rup'] # Potência de rampa de subida das UBTMs
-    eta_chg = data['eta_chg']
-    eta_dch = data['eta_dch']
     p_bm_rdown = data['p_bm_rdown'] # Potência de rampa de descida das UBTMs
     p_bat_max = data['p_bat_max'] # Potência máxima dos armazenadores
     p_dl_min = data['p_dl_min'] # Potência das cargas despacháveis
@@ -62,7 +60,6 @@ def ieq_constr(x: np.ndarray, data: dict)-> np.ndarray[np.ndarray]:
     # Decompondo a população inicial em variáveis de decisão para teste
     p_bm, p_chg, p_dch, soc, p_dl, u_bm, u_chg, u_dch, u_dl = decompose(x, data)
    
-    
     Nbmc = (Nbm * Nt) + (Nbm * Nt) + (Nbm * (Nt - 1)) + (Nbm * (Nt - 1)) # Quantidade de restrições de desigualdade das UBTMs
     bm_constr = np.zeros(Nbmc) # Vetor de restrições de desigualdade das UBTMs (bm_constraints)
     k = 0
@@ -82,7 +79,7 @@ def ieq_constr(x: np.ndarray, data: dict)-> np.ndarray[np.ndarray]:
     # Calculando a potência subida das UBTMs: p_bm[i, t] - p_bm[i, t - 1] - p_bm_rup[i] <= 0
     for t in range(1, Nt):
         for i in range(Nbm):
-            bm_constr[k] = p_bm[i, t] - p_bm[i, t - 1] * p_bm_rup[i]
+            bm_constr[k] = p_bm[i, t] - p_bm[i, t - 1] - p_bm_rup[i]
             k += 1
 
     # Calculando a potência descida das UBTMs: p_bm[i, t - 1] - p_bm[i, t] - p_bm_rdonw[i] >= 0
@@ -94,20 +91,6 @@ def ieq_constr(x: np.ndarray, data: dict)-> np.ndarray[np.ndarray]:
     Nbatc = (Nbat * Nt) + (Nbat * Nt) + (Nbat * Nt) # Quantidade de restrições de desigualdade dos armazenadores
     bat_constr =  np.zeros(Nbatc) # Vetor de restrições de desigualdade dos armazendores (bat_constr - batery constraints)
     k = 0
-
-    # # soc +
-    # ((Nt - 1) * Nbat) + ((Nt - 1) * Nbat) + 
-    # for t in range(1, Nt):
-    #     for i in range(Nbat):
-    #         bat_constr[k] = soc[i, t] - soc[i, t - 1] - (p_chg[i, t] * eta_chg[i]) + (p_dch[i, t] / eta_dch[i])  
-    #         k += 1
-
-    # # soc - 
-    # shift = ((Nt - 1) * Nbat)
-    # for t in range(1, Nt):
-    #     for i in range(Nbat):
-    #         bat_constr[k] = - bat_constr[k - shift]
-    #         k += 1
 
     # Calculando as restrições de carregamento máximo dos armazenadores: p_chg[i, t] - p_bat_max[i] * u_chg[i, t] <= 0
     for t in range(Nt):
@@ -176,15 +159,11 @@ if __name__ == '__main__':
     path = Path(__file__).parent / 'scenarios_with_PVGIS.pkl'
     cenarios = import_scenarios_from_pickle(path)
 
-    
-
     # Acrescentando as projeções iniciais ao dicionário data
     for cenario in cenarios:
 
-        data['p_dl_ref'] = cenario['p_dl_ref'] 
-
-        # data['p_dl_max'] = cenario['p_dl_max']
-        data['p_dl_min'] = cenario['p_dl_ref']
+        data['p_dl_max'] = cenario['p_dl_ref'] * 1.2 
+        data['p_dl_min'] = cenario['p_dl_ref'] * 0.8
 
     # Teste
     constr = ieq_constr(x, data)

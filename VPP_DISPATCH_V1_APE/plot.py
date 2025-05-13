@@ -71,9 +71,9 @@ def plot(data: dict)-> None:
         
         title = f'Usina de Biomassa {i + 1}' 
         plt.figure(figsize = (10, 5))
-        plt.plot(t, p_bm[i, :] * S_base, 'b')
-        plt.plot(t, np.ones(Nt) * p_bm_max[i] * S_base, '--r')
-        plt.plot(t, np.ones(Nt) * p_bm_min[i] * S_base, '--r')
+        plt.plot(t, p_bm[i, :], 'b')
+        plt.plot(t, np.ones(Nt) * p_bm_max[i], '--r')
+        plt.plot(t, np.ones(Nt) * p_bm_min[i], '--r')
         plt.title(title)
         plt.xlabel('Hora')
         plt.ylabel('Potência em MW')
@@ -93,8 +93,8 @@ def plot(data: dict)-> None:
 
         title_name = f'Carga Bateria {i + 1}'
         plt.figure(figsize = (10, 4))
-        plt.plot(t, p_bat_max[i] * np.ones(Nt) * S_base, 'b--')
-        plt.step(t, p_chg[i,:] * u_chg[i,:] * S_base, 'r')
+        plt.plot(t, p_bat_max[i] * np.ones(Nt), 'b--')
+        plt.step(t, p_chg[i,:] * u_chg[i,:], 'r')
         plt.title(title_name)
         plt.xlabel('Hora')
         plt.ylabel('Potência')
@@ -103,8 +103,8 @@ def plot(data: dict)-> None:
 
         title_name = f'Descarga Bateria {i + 1}'
         plt.figure(figsize = (10, 4))
-        plt.plot(t, p_bat_max[i] * np.ones(Nt) * S_base, 'b--')
-        plt.step(t, p_dch[i,:] * u_dch[i,:] * S_base, 'r')
+        plt.plot(t, p_bat_max[i] * np.ones(Nt), 'b--')
+        plt.step(t, p_dch[i,:] * u_dch[i,:], 'r')
         plt.title(title_name)
         plt.xlabel('Hora')
         plt.ylabel('Potência')
@@ -113,9 +113,9 @@ def plot(data: dict)-> None:
 
         title_name = f'Soc Bateria {i + 1}'
         plt.figure(figsize = (10, 4))
-        plt.plot(t, soc_min[i] * np.ones(Nt) * S_base, 'b--')
-        plt.plot(t, soc_max[i] * np.ones(Nt) * S_base, 'b--')
-        plt.step(t, soc[i,:] * S_base, 'r')
+        plt.plot(t, soc_min[i] * np.ones(Nt), 'b--')
+        plt.plot(t, soc_max[i] * np.ones(Nt), 'b--')
+        plt.step(t, soc[i,:], 'r')
         plt.title(title_name)        
         plt.xlabel('Hora')
         plt.ylabel('Carga')
@@ -127,10 +127,10 @@ def plot(data: dict)-> None:
 
         title_name = f'Cargas despachaveis {i + 1}'
         plt.figure(figsize = (10, 4))
-        plt.plot(t, p_dl_ref[i,:] * S_base, 'r')
-        plt.plot(t, p_dl_min[i,:] * S_base, 'b--')
-        plt.plot(t, p_dl_max[i,:] * S_base, 'b--')
-        plt.plot(t, p_dl[i,:] * S_base, 'k')
+        plt.plot(t, p_dl_ref[i,:], 'r')
+        plt.plot(t, p_dl_min[i,:], 'b--')
+        plt.plot(t, p_dl_max[i,:], 'b--')
+        plt.plot(t, p_dl[i,:] * u_dl[i, t], 'k')
         plt.title(title_name)
         plt.xlabel('hora')
         plt.ylabel('Potência em MW')
@@ -142,7 +142,7 @@ def plot(data: dict)-> None:
 
         title_name = f'Usina Solar FV {i + 1}'
         plt.figure(figsize = (10, 4))
-        plt.plot(t, p_pv[i] * S_base, 'r')
+        plt.plot(t, p_pv[i], 'r')
         plt.title(title_name)
         plt.xlabel('hora')
         plt.ylabel('Potência em MW')
@@ -153,7 +153,7 @@ def plot(data: dict)-> None:
 
         title_name = f'Usina Eólica {i + 1}'
         plt.figure(figsize = (10, 4))
-        plt.plot(t, p_wt[i] * S_base, 'r')
+        plt.plot(t, p_wt[i], 'r')
         plt.title(title_name)
         plt.xlabel('hora')
         plt.ylabel('Potência em MW')
@@ -163,17 +163,17 @@ def plot(data: dict)-> None:
     p_liq = np.zeros(Nt)
     for t in range(Nt):
         for i in range(Npv):
-            p_liq[t] += p_pv[i, t] * S_base
+            p_liq[t] += p_pv[i, t] 
         for i in range(Nwt):
-            p_liq[t] += p_wt[i, t] * S_base
+            p_liq[t] += p_wt[i, t] 
         for i in range(Nbm):
-            p_liq[t] += p_bm[i, t] * u_bm[i, t] * S_base
+            p_liq[t] += p_bm[i, t] * u_bm[i, t] 
         for i in range(Nl):
-            p_liq[t] -= p_l[i, t] * S_base
+            p_liq[t] -= p_l[i, t] 
         for i in range(Ndl):
-            p_liq[t] -= p_dl[i, t] * u_dl[i, t] * S_base
+            p_liq[t] -= p_dl[i, t] * u_dl[i, t] 
         for i in range(Ndl):
-            p_liq[t] -= (p_chg[i, t] * u_chg[i, t] + p_dch[i, t] * u_dch[i, t]) * S_base
+            p_liq[t] -= p_chg[i, t] * u_chg[i, t] + p_dch[i, t] * u_dch[i, t] 
 
     p_exp = np.maximum(0, p_liq)
     p_imp = np.maximum(0, - p_liq)

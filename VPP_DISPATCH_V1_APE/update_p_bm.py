@@ -1,78 +1,65 @@
 import numpy as np
-''' Essa função visa atualizar limites máximos e mínimos das potências das Usinas de biomassa através de uma curva de duração das cargas,por fim, por questões de visualização um gráfico é exibido na tela do usuário'''
+
+'''
+    Atualiza os limites máximo, mínimo e médio da potência de uma usina de biomassa
+    com base na curva de duração das cargas e da geração renovável.
+
+    Argumentos:
+    - Nt: número de instantes de tempo (ex: 24 horas)
+    - p_l: matriz de perfis de carga não despachável [Nl x Nt]
+    - p_dl_ref: matriz de perfis de carga despachável de referência [Ndl x Nt]
+    - p_pv: matriz de geração solar fotovoltaica [Npv x Nt]
+    - p_wt: matriz de geração eólica [Nwt x Nt]
+
+    Retorna:
+    - c_bm_max: capacidade máxima da usina de biomassa
+    - c_bm_min: capacidade mínima da usina de biomassa
+    - c_bm_med: capacidade média da usina de biomassa
+'''
 
 def update(Nt, p_l, p_dl_ref, p_pv, p_wt):
 
     import matplotlib.pyplot as plt
-    
-    # data = vpp_data()
 
-    # Cargas despachaveis e não despachaveis
-    x_1 = np.concatenate((p_l, p_dl_ref), axis = 0) # empilhando as duas matrizes e transformando_as em uma matriz ((Nl+Ndl5)=5, Nt=24)
-    x_2 = np.concatenate((p_pv, p_wt), axis = 0)
-    x_1 = np.sum(x_1, axis = 0) # Somando as colunas e tornando a matriz acima em uma nova matriz (1, 24)
-    x_2 = np.sum(x_2, axis = 0)
-    d_1 = np.zeros(Nt) # Nl = 3, Nt = 24, Ndl = 2, criando um vetor de zeros (24,)
-    d_2 = np.zeros(Nt) # Npv = 3, Nt = 24, Nwt = 3
+    # Empilhando cargas: não-despacháveis + despacháveis
+    x_1 = np.concatenate((p_l, p_dl_ref), axis=0)  # [Nl+Ndl x Nt]
+    x_2 = np.concatenate((p_pv, p_wt), axis=0)     # [Npv+Nwt x Nt]
 
-    # iniciando uma variável contadora
-    pos = 0
-    for xi in x_1:
+    # Somando a carga e geração em cada instante de tempo
+    x_1 = np.sum(x_1, axis=0)  # [Nt] – soma das cargas
+    x_2 = np.sum(x_2, axis=0)  # [Nt] – soma das gerações
+
+    # Inicializando curvas de duração
+    d_1 = np.zeros(Nt)  # curva de duração da demanda
+    d_2 = np.zeros(Nt)  # curva de duração da geração
+
+    # Calculando as curvas de duração da carga e geração
+    for pos, xi in enumerate(x_1):
         d_1[pos] = np.sum(x_1 >= xi)
-        pos += 1
 
-    # cargas das usinas
-
-    pos = 0
-    for xi in x_2:
+    for pos, xi in enumerate(x_2):
         d_2[pos] = np.sum(x_2 >= xi)
-        pos += 1
 
+    # Ordenando as curvas
     idx_1 = np.argsort(d_1)
     d_ord_1 = np.sort(d_1)
     idx_2 = np.argsort(d_2)
     d_ord_2 = np.sort(d_2)
 
-    c_bm_max = max(x_1) # Capacidade máxima da usina de biomassa
-    c_bm_min = min(x_1) # Capacidade mínima da usina de biomassa
-    c_bm_med = (max(x_1) - min(x_1)) / 2 + min(x_1) 
-    # print(f'{r_up:.2f}')
-    # print(f'{r_down:.2f}')
+    # Determinando capacidades de operação da usina de biomassa
+    c_bm_max = max(x_1)  # potência máxima necessária
+    c_bm_min = min(x_1)  # potência mínima necessária
+    c_bm_med = (c_bm_max - c_bm_min) / 2 + c_bm_min  # média
 
-    plt.figure(figsize = (10, 5))
+    # Gerando o gráfico de curva de duração
+    plt.figure(figsize=(10, 5))
     plt.plot(d_ord_1, x_1[idx_1])
     plt.plot(d_ord_2, x_2[idx_2])
-    # plt.axhline(c_bm_max, color = 'r', linestyle = '-.')
-    # plt.axhline(c_bm_min, color = 'm', linestyle = '-.')
-    # plt.axhline(c_bm_med, color = 'k', linestyle = '--')
     plt.title('Gráfico de duração de cargas')
-    plt.xlabel('duração')
-    plt.ylabel('Cargas')
-    plt.legend(['desp', 'ger'])
-    # plt.legend(['desp', 'ger','c_bm_max', 'c_bm_min', 'c_bm_med'])
+    plt.xlabel('Duração (tempo com valor ≥ x)')
+    plt.ylabel('Potência [pu]')
+    plt.legend(['Demanda (Carga total)', 'Geração renovável'])
     plt.tight_layout()
-    # plt.grid(True)
     plt.show()
 
     return c_bm_max, c_bm_min, c_bm_med
-
-# # Exemplo de uso
-
-# from carrega_projecoes import carrega_projecoes
-# from vppdata1_module import vpp_data
-
-# data = vpp_data()
-
-# Nt = 24  # Número de pontos de dados na série temporal
-# Nl = data['Nl']   # Número de cargas
-# Ndl = data['Ndl'] # Número de cargas de referência
-# Npv = data['Npv']  # Número de sistemas fotovoltaicos
-# Nwt = data['Nwt']  # Número de sistemas de geração eólica
-
-# p_l, p_pv, p_wt, p_dl_ref, p_dl_min, p_dl_max, tau_pld, tau_dist, tau_dl = carrega_projecoes(Nt, Nl, Ndl, Npv, Nwt)
-
-# a, b, c = update(Nt, p_l, p_dl_max, p_pv, p_wt)
-
-# print(f'P_bm_max == {a:.2f}')
-# print(f'P_bm_min == {b:.2f}')
-# print(f'P_bm_med == {c:.2f}')

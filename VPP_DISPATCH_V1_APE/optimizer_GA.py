@@ -10,18 +10,30 @@ from pymoo.config import Config
 Config.warnings['not_compiled'] = False
 
 '''
-    Este script tem a finalidade de construir um otimizador (GA) para encontrar soluções ótimas (maximizar o lucro) de uma função objetivo de VPP.
-        
-        - Parâmetros de entrada (data: dict):
-            - data: Dicionário contendo os parâmetros inciais e as projeções temporais iniciais;
+    Este script implementa um otimizador baseado no Algoritmo Genético (GA) para maximizar o lucro de uma Virtual Power Plant (VPP).
 
-                - Projeções iniciais:
-                    - Nt: Período da simulação da VPP;
-                    - Ndl: Quantidade de cargas despacháveis da VPP;
-                    - Nbm: Quantidade de UBTMs da VPP;
-                    - Nbat: Quantidade de armazenadores da VPP;
+    -> Parâmetros de Entrada:
+        - **data (dict)**: Dicionário com os dados iniciais e projeções temporais da VPP:
+            - Nt: Número de períodos de simulação.
+            - Ndl: Quantidade de cargas despacháveis.
+            - Nbm: Quantidade de usinas de biomassa (UBTM).
+            - Nbat: Quantidade de armazenadores de energia.
 
-        - Retorna:
+    -> Processo:
+        1. Definição do Problema: O problema é modelado como um problema de otimização de múltiplas variáveis, com variáveis contínuas (potências, estados de carga, etc.) e variáveis inteiras (decisão de operação).
+        2. Restrições: São aplicadas restrições de igualdade e desigualdade, incluindo capacidade de geração, estados de carga e operação das usinas.
+        3. Função Objetivo: A função objetivo busca maximizar o lucro da VPP, calculando os custos e receitas de operação.
+        4. Otimização: O GA é utilizado para encontrar as soluções ótimas, considerando penalidades para restrições violadas.
+
+    -> Saída:
+        - res (Result): Resultado da otimização contendo as variáveis de decisão otimizadas (potências, estados de carga, etc.) e o valor da função objetivo (lucro).
+
+    -> Dependências:
+        - pymoo: Framework de otimização para resolução de problemas de otimização de múltiplos objetivos.
+        - objetive_function: Função objetivo para cálculo do lucro.
+        - ieq_constr: Restrições de desigualdade.
+        - eq_constr: Restrições de igualdade.
+        - get_limits: Função para obter os limites das variáveis de decisão.
 '''
 
 def solver(data: dict):
@@ -86,7 +98,7 @@ def solver(data: dict):
 
     # Definindo o algoritmo 
     # algorithm = GA(pop_size = 100, eliminate_duplicates = True)
-    algorithm = AdaptiveEpsilonConstraintHandling(GA(pop_size = 25, eliminate_duplicates = True), perc_eps_until = 0.5)
+    algorithm = AdaptiveEpsilonConstraintHandling(GA(pop_size = 100, eliminate_duplicates = True), perc_eps_until = 0.5)
 
     # Definindo quando o algoritmo deve parar
     # termination = RobustTermination(SingleObjectiveSpaceTermination(tol = 0.01), period = 30,)
@@ -102,5 +114,3 @@ def solver(data: dict):
 
 
     return res
-
- 
