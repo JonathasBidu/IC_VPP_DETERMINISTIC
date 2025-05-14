@@ -69,23 +69,48 @@ def plot(data: dict)-> None:
     # Plotagem das UBMTs
     for i in range(Nbm):
         
-        title = f'Usina de Biomassa {i + 1}' 
-        plt.figure(figsize = (10, 5))
-        plt.plot(t, p_bm[i, :], 'b')
-        plt.plot(t, np.ones(Nt) * p_bm_max[i], '--r')
-        plt.plot(t, np.ones(Nt) * p_bm_min[i], '--r')
-        plt.title(title)
-        plt.xlabel('Hora')
-        plt.ylabel('Potência em MW')
-        plt.legend(['p_bm', 'max', 'min'])
-        plt.show()
+        # title = f'Usina de Biomassa {i + 1}' 
+        # plt.figure(figsize = (10, 5))
+        # plt.step(t, p_bm[i, :], 'b')
+        # plt.step(t, np.ones(Nt) * p_bm_max[i], '--r')
+        # plt.step(t, np.ones(Nt) * p_bm_min[i] * u_bm[i, :], '--r')
+        # plt.title(title)
+        # plt.xlabel('Hora')
+        # plt.ylabel('Potência em MW')
+        # plt.legend(['p_bm', 'max', 'min'])
+        # plt.show()
 
-        title = f'Estado da usina de Biomassa {i + 1}' 
-        plt.figure(figsize = (10, 5))
-        plt.bar(t, u_bm[i, :], color=['gray' if v == 0 else 'green' for v in u_bm[i, :]], width=1, edgecolor='black', align = 'edge')
-        plt.title(title)
-        plt.xlabel('Hora')
-        plt.yticks([0, 1], ['Off', 'On'])
+        # title = f'Estado da usina de Biomassa {i + 1}' 
+        # plt.figure(figsize = (10, 5))
+        # plt.bar(t, u_bm[i, :], color=['gray' if v == 0 else 'green' for v in u_bm[i, :]], width=1, edgecolor='black', align = 'edge')
+        # plt.title(title)
+        # plt.xlabel('Hora')
+        # plt.yticks([0, 1], ['Off', 'On'])
+        # plt.show()
+        
+        # Criação de uma figura com dois subgráficos (1 coluna, 2 linhas)
+        fig, axs = plt.subplots(2, 1, figsize = (12, 6), sharex = True)
+
+        # Gráfico de potência
+        axs[0].step(t, p_bm[i, :], 'b', where = 'mid', label = 'p_bm') 
+        axs[0].step(t, np.ones(Nt) * p_bm_max[i], '--r', where = 'mid', label = 'max')
+        axs[0].step(t, p_bm_min[i] * u_bm[i, :], '--r', where = 'mid', label = 'min')
+        axs[0].set_ylabel('Potência MW')
+        axs[0].set_title(f'Usina de Biomassa {i + 1}')
+        axs[0].legend(loc = 'upper right', bbox_to_anchor = (1.1, 1))  
+
+        # Gráfico de estado
+        axs[1].bar(t, u_bm[i, :], color = ['gray' if v == 0 else 'green' for v in u_bm[i, :]],
+                   width = 1, edgecolor = 'black', align = 'edge')
+        axs[1].set_yticks([0, 1])
+        axs[1].set_yticklabels(['Off', 'On'])
+        axs[1].set_ylabel('Estado')
+        axs[1].set_xlabel('Hora')
+
+        # Ajuste do layout para evitar sobreposição
+        plt.tight_layout()
+
+        # Exibe os gráficos
         plt.show()
 
     # Potagem dos SAs
@@ -94,10 +119,10 @@ def plot(data: dict)-> None:
         title_name = f'Carga Bateria {i + 1}'
         plt.figure(figsize = (10, 4))
         plt.plot(t, p_bat_max[i] * np.ones(Nt), 'b--')
-        plt.step(t, p_chg[i,:] * u_chg[i,:], 'r')
+        plt.step(t, p_chg[i, :] * u_chg[i, :], 'r')
         plt.title(title_name)
         plt.xlabel('Hora')
-        plt.ylabel('Potência')
+        plt.ylabel('Potência em MW')
         plt.legend(['max', 'load'])
         plt.show()
 
@@ -107,7 +132,7 @@ def plot(data: dict)-> None:
         plt.step(t, p_dch[i,:] * u_dch[i,:], 'r')
         plt.title(title_name)
         plt.xlabel('Hora')
-        plt.ylabel('Potência')
+        plt.ylabel('Potência em MW')
         plt.legend(['max', 'discharge'])
         plt.show()
 
@@ -118,7 +143,7 @@ def plot(data: dict)-> None:
         plt.step(t, soc[i,:], 'r')
         plt.title(title_name)        
         plt.xlabel('Hora')
-        plt.ylabel('Carga')
+        plt.ylabel('Carga em MW')
         plt.legend(['min', 'max', 'soc'])
         plt.show()
 
@@ -130,7 +155,7 @@ def plot(data: dict)-> None:
         plt.plot(t, p_dl_ref[i,:], 'r')
         plt.plot(t, p_dl_min[i,:], 'b--')
         plt.plot(t, p_dl_max[i,:], 'b--')
-        plt.plot(t, p_dl[i,:] * u_dl[i, t], 'k')
+        plt.plot(t, p_dl[i,:], 'k')
         plt.title(title_name)
         plt.xlabel('hora')
         plt.ylabel('Potência em MW')
@@ -172,8 +197,11 @@ def plot(data: dict)-> None:
             p_liq[t] -= p_l[i, t] 
         for i in range(Ndl):
             p_liq[t] -= p_dl[i, t] * u_dl[i, t] 
-        for i in range(Ndl):
-            p_liq[t] -= p_chg[i, t] * u_chg[i, t] + p_dch[i, t] * u_dch[i, t] 
+        # for i in range(Nbat):
+        #     p_liq[t] -= p_chg[i, t] * u_chg[i, t] + p_dch[i, t] * u_dch[i, t] 
+        for i in range(Nbat):
+            p_liq[t] += p_dch[i, t] * u_dch[i, t] - p_chg[i, t] * u_chg[i, t]
+
 
     p_exp = np.maximum(0, p_liq)
     p_imp = np.maximum(0, - p_liq)
@@ -185,5 +213,5 @@ def plot(data: dict)-> None:
     plt.title('Exportação x Importação')
     plt.xlabel('Hora')
     plt.xlabel('Potência em MW')
-    plt.legend(['p_exp', 'p_imp'])
+    plt.legend(['Exportação', 'Importação'])
     plt.show()

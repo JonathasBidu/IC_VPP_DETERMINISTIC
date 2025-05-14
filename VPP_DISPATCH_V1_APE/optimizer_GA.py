@@ -98,18 +98,21 @@ def solver(data: dict):
 
     # Definindo o algoritmo 
     # algorithm = GA(pop_size = 100, eliminate_duplicates = True)
-    algorithm = AdaptiveEpsilonConstraintHandling(GA(pop_size = 100, eliminate_duplicates = True), perc_eps_until = 0.5)
+    algorithm = AdaptiveEpsilonConstraintHandling(GA(pop_size = 200, eliminate_duplicates = True), perc_eps_until = 0.5)
 
     # Definindo quando o algoritmo deve parar
-    # termination = RobustTermination(SingleObjectiveSpaceTermination(tol = 0.01), period = 30,)
+    termination = RobustTermination(SingleObjectiveSpaceTermination(tol = 0.1), period = 15)
     # termination = DefaultSingleObjectiveTermination(xtol = 0.01, cvtol = 0.01, ftol = 0.01, period = 15)
-    termination = SingleObjectiveSpaceTermination()
+    # termination = SingleObjectiveSpaceTermination()
+    # termination = ('n_gen', 100)
 
     res = minimize(problem,
                    algorithm,
                    termination,
+                   return_least_infeasible = True,
                    seed = 1,
-                   verbose = True
+                   verbose = True,
+                   progress = True
                    )
 
 

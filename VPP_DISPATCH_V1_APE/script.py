@@ -147,9 +147,6 @@ p_dl_ref = data['p_dl_ref'] * cap_load
 data['p_dl_max'] = data['p_dl_ref'] + data['p_dl_ref'] * delta
 data['p_dl_min'] = data['p_dl_ref'] - data['p_dl_ref'] * delta
 
-# Gerando curva de duração de carga para análise visual da biomassa
-cap_bm_max, cap_bm_min, cap_bm_med = update(Nt, p_l, p_dl_ref, p_pv, p_wt) 
-
 # Resolvendo o problema de otimização com Algoritmo Genético
 res = solver(data)
 
@@ -160,6 +157,12 @@ if x is not None:
     # Decompondo o vetor de soluções nas variáveis de decisão
     data['p_bm'], data['p_chg'], data['p_dch'], data['soc'], data['p_dl'], data['u_bm'], data['u_chg'], data['u_dch'], data['u_dl'] = decompose(x, data)
 
+    # Ponderando pelas variáveis de estado (antes do plot)
+    data['p_bm']   = data['p_bm']   * data['u_bm']
+    data['p_chg']  = data['p_chg']  * data['u_chg']
+    data['p_dch']  = data['p_dch']  * data['u_dch']
+    # data['p_dl']   = data['p_dl']   * data['u_dl']
+
     # Gerando gráfico
     plot(data)
 
@@ -168,6 +171,6 @@ if x is not None:
     valor = f'{valor:,.2f}'.replace(',', 'v').replace('.', ',').replace('v', '.')
 
     print(f'\nO lucro obtido nessa simulação foi de {valor} R$\n')
-    # print(f'Nessa simulação as restrições foram violadas {res.CV[0]} vezes\n')
+    print(f'Nessa simulação as restrições foram violadas {res.CV[0]} vezes\n')
 else:
     print('\nSolução não encontrada\n')

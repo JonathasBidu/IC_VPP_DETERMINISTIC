@@ -116,8 +116,8 @@ def decompose(x: np.ndarray, data: dict)-> tuple[np.ndarray, ...]:
     begin = end
     end = end + (Nt * Ndl)
     u_dl = xi[begin: end]
-    u_dl = np.float64(u_dl > 0.5) # Lógica para que u_bm seja binário
-    u_dl = u_dl.reshape((Ndl, Nt)) # Ajustando a dimensão de u_bm para (Nbat, Nt) 
+    u_dl = np.float64(u_dl > 0.5) # Lógica para que u_dl seja binário
+    u_dl = u_dl.reshape((Ndl, Nt)) # Ajustando a dimensão de u_bm para (Ndl, Nt) 
 
     return p_bm, p_chg, p_dch, soc, p_dl, u_bm, u_chg, u_dch, u_dl
 

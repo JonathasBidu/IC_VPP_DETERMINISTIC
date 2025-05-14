@@ -114,16 +114,26 @@ def ieq_constr(x: np.ndarray, data: dict)-> np.ndarray:
     dl_constr = np.zeros(Ndlc) # Vetor de restrições de desigualdade das cargas despacháveis (dl_constr - dload constraints)
     k = 0
     # Calculando as restrições de potência mínima das cargas despacháveis: p_dl_min[i, t] * u_dl[i, t] - p_dl[i, t] <= 0
-    for t in range(Nt):
-        for i in range(Ndl):
-            dl_constr[k] = p_dl_min[i, t] * u_dl[i, t] - p_dl[i, t]
-            k += 1
+    # for t in range(Nt):
+    #     for i in range(Ndl):
+    #         dl_constr[k] = p_dl_min[i, t] * u_dl[i, t] - p_dl[i, t]
+    #         k += 1
 
-    # Calculando as restrições de potência máxima das cargas despacháveis: p_dl[i, t] - p_dl_max[i, t] * u_dl[i, t] <= 0
-    for t in range(Nt):
-        for i in range(Ndl):
+    # # Calculando as restrições de potência máxima das cargas despacháveis: p_dl[i, t] - p_dl_max[i, t] * u_dl[i, t] <= 0
+    # for t in range(Nt):
+    #     for i in range(Ndl):
+    #         dl_constr[k] = p_dl[i, t] - p_dl_max[i, t] * u_dl[i, t]
+    #         k += 1
+        # p_dl_max (potência máxima da iésima carga despachavel)
+    for i in range(Ndl):
+        for t in range(Nt):
             dl_constr[k] = p_dl[i, t] - p_dl_max[i, t] * u_dl[i, t]
-            k += 1
+            k +=1 
+
+    # p_dl_min (potência mínima da iésima carga despachavel)
+    for i in range(Ndl):
+        for t in range(Nt):
+            dl_constr[k] = p_dl_min[i, t] * u_dl[i, t] - p_dl[i, t]
 
     # Vetor com todas as restrições de desigualdade da VPP
     c_ieq = np.concatenate((bm_constr, bat_constr, dl_constr))
