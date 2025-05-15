@@ -48,6 +48,10 @@ def bounds(data: dict)-> tuple[np.ndarray, np.ndarray]:
     soc_min = data['soc_min'] # Nível mínimo de carga da bateria
     soc_max = data['soc_max'] # Nível máximo de carga da bateria
 
+    # Parâmetros das UBTMs
+    p_dl_max = data['p_dl_max']
+    p_dl_min = data['p_dl_min']
+
     # Definindo a quantidade de variáveis reais (Nr) e inteiras (Ni)
     # p_bm, p_chg, p_dch, soc, p_dl
     Nr =  (Nt * Nbm) + (Nt * Nbat) + (Nbat * Nt) + (Nt * Nbat) + (Nt * Ndl)
@@ -90,8 +94,8 @@ def bounds(data: dict)-> tuple[np.ndarray, np.ndarray]:
     # Limite de p_dl
     for i in range(Ndl):
         for t in range(Nt):
-            lower_bounds[k] = data['p_dl_min'][i, t]
-            upper_bounds[k] = data['p_dl_max'][i, t]
+            upper_bounds[k] = p_dl_max[i, t]
+            lower_bounds[k] = p_dl_min[i, t]
             k += 1
 
     # u_bm, u_chg, u_dch, u_dl: upper_bounds = 1 and lower_bounds = 0

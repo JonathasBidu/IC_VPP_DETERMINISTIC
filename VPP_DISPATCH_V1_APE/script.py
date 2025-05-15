@@ -1,4 +1,4 @@
-from generator_scenarios import import_scenarios_from_pickle
+from generator_scenarios import import_scenarios_from_pickle, create_scenarios
 from decompose_vetor import decompose
 from vpp_initial_data import vpp_data
 from optimizer_GA import solver
@@ -8,7 +8,7 @@ from plot import plot
 import numpy as np
 
 '''
-    Este script simula uma Virtual Power Plant (VPP) e otimiza o despacho de energia para maximizar o lucro.
+    Este script simula uma Virtual Power Plant (VPP) e otimiza o despacho de energia para maximizar o lucro dado um horizonte de tempo (Nt).
 
     A VPP é composta por usinas solares, eólicas, e de biomassa, considerando demandas de carga, geração renovável, e tarifas. A otimização é realizada utilizando um Algoritmo Genético (GA), respeitando as restrições de capacidade das usinas e das cargas.
 
@@ -121,8 +121,26 @@ Nbat = data['Nbat']
 
 # Carregando os cenários de um arquivo pickle contendo perfis de carga, geração renovável
 # e tarifas aplicáveis (PLD, distribuidora e compensação por corte de carga)
-path = Path(__file__).parent / "scenarios_with_PVGIS.pkl"
-cenarios = import_scenarios_from_pickle(path)
+# path = Path(__file__).parent / "scenarios_with_PVGIS.pkl"
+# cenarios = import_scenarios_from_pickle(path)
+
+# Definindo a quantidade de cenários da simulação
+while True:
+    Ns = input('Insira a quantidade de cenários desejados ou tecle enter para 1 cenário: ')
+    if Ns == '':
+        Ns = 1
+        break
+    try:
+        Ns = int(Ns)
+        if Ns > 0:
+            break
+        else:
+            print('Insira um valor inteiro e positivo')
+    except ValueError as v:
+        print('Insira um valor numérico e válido')
+
+# Cenários gerados 
+cenarios = create_scenarios(Ns, data)
 
 # Sorteando aleatoriamente um índice de cenário dentre os disponíveis
 idx = np.random.choice(len(cenarios))

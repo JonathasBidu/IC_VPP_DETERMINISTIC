@@ -89,12 +89,12 @@ def plot(data: dict)-> None:
         # plt.show()
         
         # Criação de uma figura com dois subgráficos (1 coluna, 2 linhas)
-        fig, axs = plt.subplots(2, 1, figsize = (12, 6), sharex = True)
+        fig, axs = plt.subplots(2, 1, figsize = (18, 8), sharex = True)
 
         # Gráfico de potência
-        axs[0].step(t, p_bm[i, :], 'b', where = 'mid', label = 'p_bm') 
-        axs[0].step(t, np.ones(Nt) * p_bm_max[i], '--r', where = 'mid', label = 'max')
-        axs[0].step(t, p_bm_min[i] * u_bm[i, :], '--r', where = 'mid', label = 'min')
+        axs[0].step(t, p_bm[i, :], 'b', where = 'post', label = 'p_bm') 
+        axs[0].step(t, np.ones(Nt) * p_bm_max[i], '--r', where = 'post', label = 'max')
+        axs[0].step(t, p_bm_min[i] * u_bm[i, :], '--r', where = 'post', label = 'min')
         axs[0].set_ylabel('Potência MW')
         axs[0].set_title(f'Usina de Biomassa {i + 1}')
         axs[0].legend(loc = 'upper right', bbox_to_anchor = (1.1, 1))  
@@ -159,7 +159,7 @@ def plot(data: dict)-> None:
         plt.title(title_name)
         plt.xlabel('hora')
         plt.ylabel('Potência em MW')
-        plt.legend(['ref', 'min', 'desp'])
+        plt.legend(['ref', 'min', 'max', 'desp'])
         plt.show()
 
     # Plotagem das FVs
@@ -212,6 +212,6 @@ def plot(data: dict)-> None:
     plt.plot(p_imp, 'r')
     plt.title('Exportação x Importação')
     plt.xlabel('Hora')
-    plt.xlabel('Potência em MW')
+    plt.ylabel('Potência em MW')
     plt.legend(['Exportação', 'Importação'])
     plt.show()

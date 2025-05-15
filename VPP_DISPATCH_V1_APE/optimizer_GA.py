@@ -13,14 +13,14 @@ Config.warnings['not_compiled'] = False
     Este script implementa um otimizador baseado no Algoritmo Genético (GA) para maximizar o lucro de uma Virtual Power Plant (VPP).
 
     -> Parâmetros de Entrada:
-        - **data (dict)**: Dicionário com os dados iniciais e projeções temporais da VPP:
+        - data (dict): Dicionário com os dados iniciais e projeções temporais da VPP:
             - Nt: Número de períodos de simulação.
             - Ndl: Quantidade de cargas despacháveis.
             - Nbm: Quantidade de usinas de biomassa (UBTM).
             - Nbat: Quantidade de armazenadores de energia.
 
     -> Processo:
-        1. Definição do Problema: O problema é modelado como um problema de otimização de múltiplas variáveis, com variáveis contínuas (potências, estados de carga, etc.) e variáveis inteiras (decisão de operação).
+        1. Definição do Problema: O problema é modelado como um problema de otimização interira mista de múltiplas variáveis, com variáveis contínuas (potências, carga, e tarifas) e variáveis inteiras (estados de operação).
         2. Restrições: São aplicadas restrições de igualdade e desigualdade, incluindo capacidade de geração, estados de carga e operação das usinas.
         3. Função Objetivo: A função objetivo busca maximizar o lucro da VPP, calculando os custos e receitas de operação.
         4. Otimização: O GA é utilizado para encontrar as soluções ótimas, considerando penalidades para restrições violadas.
@@ -39,8 +39,8 @@ Config.warnings['not_compiled'] = False
 def solver(data: dict):
 
     # Parâmetros iniciais da VPP
-    Nt = data['Nt'] # Períod ad simulação da VPP
-    Ndl = data['Ndl'] # Quantida de cargas despacháveis da VPP
+    Nt = data['Nt'] # Período da simulação da VPP
+    Ndl = data['Ndl'] # Quantidade de cargas despacháveis da VPP
     Nbm = data['Nbm'] # Quantidade de UBTMs da VPP
     Nbat = data['Nbat'] # Quantidade de armazenadores da VPP
 
@@ -98,13 +98,13 @@ def solver(data: dict):
 
     # Definindo o algoritmo 
     # algorithm = GA(pop_size = 100, eliminate_duplicates = True)
-    algorithm = AdaptiveEpsilonConstraintHandling(GA(pop_size = 200, eliminate_duplicates = True), perc_eps_until = 0.5)
+    algorithm = AdaptiveEpsilonConstraintHandling(GA(pop_size = 50, eliminate_duplicates = True), perc_eps_until = 0.5)
 
     # Definindo quando o algoritmo deve parar
-    termination = RobustTermination(SingleObjectiveSpaceTermination(tol = 0.1), period = 15)
+    # termination = RobustTermination(SingleObjectiveSpaceTermination(tol = 0.1), period = 15)
     # termination = DefaultSingleObjectiveTermination(xtol = 0.01, cvtol = 0.01, ftol = 0.01, period = 15)
     # termination = SingleObjectiveSpaceTermination()
-    # termination = ('n_gen', 100)
+    termination = ('n_gen', 50)
 
     res = minimize(problem,
                    algorithm,
