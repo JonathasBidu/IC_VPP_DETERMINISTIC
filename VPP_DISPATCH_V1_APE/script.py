@@ -1,11 +1,14 @@
-from generator_scenarios import import_scenarios_from_pickle, create_scenarios
+from generator_scenarios import import_scenarios_from_pickle, create_scenarios, save_scenarios_to_pickle
+from calculate_energy_balance import calculate
+from save_to_excel import save_simulation_to_excel
 from decompose_vetor import decompose
 from vpp_initial_data import vpp_data
 from optimizer_GA import solver
 from update_p_bm import update
 from pathlib import Path
 from plot import plot
-import numpy as np
+import numpy as np 
+import time
 
 '''
     Este script simula uma Virtual Power Plant (VPP) e otimiza o despacho de energia para maximizar o lucro dado um horizonte de tempo (Nt).
@@ -43,9 +46,9 @@ import numpy as np
 
 # Definindo o período da simulação da VPP
 while True:
-    Nt = input('Insira o período da simulação ou tecle enter para 24h: ')
+    Nt = input('Insira o período da simulação ou tecle enter para 720h (1 mês): ')
     if Nt == '':
-        Nt = 24
+        Nt = 720
         break
     try:
         Nt = int(Nt)
@@ -74,7 +77,7 @@ while True:
 while True:
     cap_wt = input('Insira a capacidade das Usinas Eólicas em p.u. ou tecle enter para 10.0 p.u.: ')
     if cap_wt == '':
-        cap_wt = 10.0     
+        cap_wt = 10.0 
     try:
         cap_wt = float(cap_wt)
         if cap_wt > 0:
@@ -86,9 +89,9 @@ while True:
 
 # Definindo a capacidade instalada das Cargas
 while True:
-    cap_load = input('Insira a capacidade das Cargas em p.u. ou tecle enter para 1 p.u.: ')
+    cap_load = input('Insira a capacidade das Cargas em p.u. ou tecle enter para 5 p.u.: ')
     if cap_load == '':
-        cap_load = 1.0
+        cap_load = 2.0
     try:
         cap_load = float(cap_load)
         if cap_load > 0:
@@ -139,8 +142,35 @@ while True:
     except ValueError as v:
         print('Insira um valor numérico e válido')
 
+# Definindo uma estação do ano
+while True:
+    season = input('Insira a estação do ano (1-verão, 2-outono, 3-inverno, 4-primavera): ')
+    if season == '':
+        season = 'verao'
+        break
+    try:
+        season = int(season)
+        if season == 1:
+            season = 'verao'
+            break
+        elif season == 2:
+            season = 'outono'
+            break
+        elif season == 3:
+            season = 'inverno'
+            break
+        elif season == 4:
+            season = 'primavera'
+            break
+        else:
+            print('Por favor, insira um número inteiro entre 1 e 4.')
+    except ValueError as v:
+        print(f'Insira um valor numério válido! {v}')
+
+
 # Cenários gerados 
-cenarios = create_scenarios(Ns, data)
+cenarios = create_scenarios(Ns, data, season)
+
 
 # Sorteando aleatoriamente um índice de cenário dentre os disponíveis
 idx = np.random.choice(len(cenarios))
@@ -165,15 +195,27 @@ p_dl_ref = data['p_dl_ref'] * cap_load
 data['p_dl_max'] = data['p_dl_ref'] + data['p_dl_ref'] * delta
 data['p_dl_min'] = data['p_dl_ref'] - data['p_dl_ref'] * delta
 
+# 
+# energia_gerada, energia_demandada = update(Nt, p_l, p_dl_ref, p_pv, p_wt)
+# print("\nResumo do Período de Simulação (30 dias):")
+# print(f"→ Energia Gerada Total:    {energia_gerada:.2f} MWh")
+# print(f"→ Energia Demandada Total: {energia_demandada:.2f} MWh\n")
+
+
 # Resolvendo o problema de otimização com Algoritmo Genético
-res = solver(data)
+begin = time.time()
+res, algorithm = solver(data)
+end = time.time()
+print(f'\nO tempo de simulação foi {(end - begin):.2f} segundos \n')
 
 x = res.X # Matriz a solução ótima
 
 if x is not None:
-
+    
     # Decompondo o vetor de soluções nas variáveis de decisão
     data['p_bm'], data['p_chg'], data['p_dch'], data['soc'], data['p_dl'], data['u_bm'], data['u_chg'], data['u_dch'], data['u_dl'] = decompose(x, data)
+
+    # calculate(data)
 
     # Ponderando pelas variáveis de estado (antes do plot)
     data['p_bm']   = data['p_bm']   * data['u_bm']
@@ -182,7 +224,10 @@ if x is not None:
     # data['p_dl']   = data['p_dl']   * data['u_dl']
 
     # Gerando gráfico
+    # plot(data)
+    from plot_CBIC import plot
     plot(data)
+
 
     # Exibindo o lucro obtido
     valor = res.F[0]
@@ -190,5 +235,26 @@ if x is not None:
 
     print(f'\nO lucro obtido nessa simulação foi de {valor} R$\n')
     print(f'Nessa simulação as restrições foram violadas {res.CV[0]} vezes\n')
+
+    ga_params = algorithm.param if hasattr(algorithm, 'param') else None
+
+    # save_simulation_to_excel(
+    #     data=data,
+    #     lucro=res.F[0],
+    #     energia_gerada=energia_gerada,
+    #     energia_demandada=energia_demandada,
+    #     res=res,
+    #     cap_pv=cap_pv,
+    #     cap_wt=cap_wt,
+    #     cap_load=cap_load,
+    #     delta=delta,
+    #     season=season,
+    #     Nt=Nt,
+    #     idx=idx,
+    #     ga_params=ga_params,  # ou None se não quiser salvar
+    #     output_path="resultado_simulacao_cenario_2_inverno.xlsx"
+    # )
+
+    
 else:
     print('\nSolução não encontrada\n')

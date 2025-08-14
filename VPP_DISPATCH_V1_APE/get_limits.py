@@ -154,6 +154,6 @@ if __name__ == '__main__':
     # Teste
     upper_bounds, lower_bounds = bounds(data)
 
-    print(f'upper_bounds shape {upper_bounds.shape} and types {type(upper_bounds)}\n{upper_bounds}\n')
+    print(f'upper_bounds shape {upper_bounds.shape} and types {type(upper_bounds)}\n')
     print(f'lower_bounds shape {lower_bounds.shape} and types {type(lower_bounds)}\n')
     

@@ -79,8 +79,8 @@ def vpp_data():
     vpp_data['Nbat'] = 2
     vpp_data['eta_chg'] = np.array([0.914, 0.914]) # Eficiência da bateria no carregamento (%)
     vpp_data['eta_dch'] = np.array([0.914, 0.914]) # Eficiência da bateria na descarga (%)
-    vpp_data['soc_min'] = np.array([0.50, 0.50]) # Nível de carga mínima (MW)
-    vpp_data['soc_max'] = np.array([0.75, 0.75]) # Nível de carga máximo (MW)
+    vpp_data['soc_min'] = np.array([0.065, 0.065]) # Nível de carga mínima (MW)
+    vpp_data['soc_max'] = np.array([0.1, 0.1]) # Nível de carga máximo (MW)
     vpp_data['p_bat_max']  = np.array([0.1, 0.1]) # Potência máxima da bateria (MW)
     vpp_data['kappa_bat']  = np.array([0.038, 0.038]) # Custo de operação (R$/kWh)
     # OBS: custos da eólica, FV e bateria arbitrados

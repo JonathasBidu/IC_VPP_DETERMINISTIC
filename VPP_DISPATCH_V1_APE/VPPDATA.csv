@@ -13,8 +13,8 @@ kappa_wt;[0.027 0.027]
 Nbat;2
 eta_chg;[0.914 0.914]
 eta_dch;[0.914 0.914]
-soc_min;[0.5 0.5]
-soc_max;[0.75 0.75]
+soc_min;[0.065 0.065]
+soc_max;[0.1 0.1]
 p_bat_max;[0.1 0.1]
 kappa_bat;[0.038 0.038]
 Ndl;2

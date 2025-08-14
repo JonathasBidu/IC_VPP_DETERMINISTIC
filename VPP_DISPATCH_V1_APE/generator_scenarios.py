@@ -62,30 +62,146 @@ import pickle
                 Lista de dicionários com os dados de cada cenário importado.
 '''
 
-def create_scenarios(Ns: int, data: dict) -> list[dict[str, np.ndarray]]:
+# def create_scenarios(Ns: int, data: dict) -> list[dict[str, np.ndarray]]:
 
+#     Nt = data['Nt']
+#     Npoints = 8760  # Total de horas em um ano
+#     base_year = 2013
+#     total_years = 11  # De 2013 até 2023
+
+#     # Sorteia um único dia e hora (fixo para todos os cenários)
+#     max_start_day = (Npoints - Nt) // 24
+#     begin = np.random.randint(0, max_start_day) * 24
+#     end = begin + Nt
+
+#     scenarios = []
+
+#     for n in range(Ns):
+
+#         idx = np.random.choice(total_years)  # idx de 0 a 10
+#         year = base_year + idx
+
+#         # Data real da simulação
+#         selected_date = datetime(year, 1, 1) + timedelta(hours = begin)
+#         print(f"Cenário para {selected_date.strftime('%d/%m/%Y')} às {selected_date.strftime('%H:%M')}")
+
+#         # Projeções para o ano escolhido (linha = idx)
+#         p_l, p_pv, p_wt, p_dl_ref, tau_pld, tau_dist, tau_dl = projections(data, begin, end, idx)
+
+#         scenario = {
+#             'p_l': p_l,
+#             'p_pv': p_pv,
+#             'p_wt': p_wt,
+#             'p_dl_ref': p_dl_ref,
+#             'tau_pld': tau_pld,
+#             'tau_dist': tau_dist,
+#             'tau_dl': tau_dl
+#         }
+#         scenarios.append(scenario)
+
+#     return scenarios
+
+# from datetime import datetime, timedelta
+# import numpy as np
+
+# def create_scenarios(Ns: int, data: dict, season: str) -> list[dict[str, np.ndarray]]:
+#     Nt = data['Nt']
+#     Npoints = 8760  # Total de horas em um ano
+#     base_year = 2013
+#     total_years = 11  # De 2013 até 2023
+
+#     # Mapeamento dos meses por estação (hemisfério sul)
+#     season_months = {
+#         'verao': [12, 1, 2],      # dezembro, janeiro, fevereiro
+#         'outono': [3, 4, 5],      # março, abril, maio
+#         'inverno': [6, 7, 8],     # junho, julho, agosto
+#         'primavera': [9, 10, 11]  # setembro, outubro, novembro
+#     }
+
+#     if season not in season_months:
+#         raise ValueError(f"Estação inválida: {season}. Use: verao, outono, inverno ou primavera.")
+
+#     scenarios = []
+
+#     for n in range(Ns):
+#         idx = np.random.choice(total_years)
+#         year =  2023 #base_year + idx
+
+#         mes = np.random.choice(season_months[season])
+
+#         ano_inicio = year 
+
+#         hora_inicio = (datetime(ano_inicio, mes, 1) - datetime(ano_inicio, 1, 1)).days * 24
+#         begin = hora_inicio
+#         end = begin + Nt
+
+#         if end > Npoints:
+#             begin = Npoints - Nt
+#             end = Npoints
+
+#         selected_date_start = datetime(ano_inicio, 1, 1) + timedelta(hours=begin)
+#         selected_date_end = selected_date_start + timedelta(hours=Nt - 1)
+
+#         print(f"Cenário {n+1} → {season.title()} ({year}): início {selected_date_start.strftime('%d/%m/%Y %H:%M')} - fim {selected_date_end.strftime('%d/%m/%Y %H:%M')}\n")
+
+#         p_l, p_pv, p_wt, p_dl_ref, tau_pld, tau_dist, tau_dl = projections(data, begin, end, idx)
+
+#         scenario = {
+#             'p_l': p_l,
+#             'p_pv': p_pv,
+#             'p_wt': p_wt,
+#             'p_dl_ref': p_dl_ref,
+#             'tau_pld': tau_pld,
+#             'tau_dist': tau_dist,
+#             'tau_dl': tau_dl,
+#             'ano': year,
+#             'mes': mes,
+#             'inicio': selected_date_start,
+#             'fim': selected_date_end
+#         }
+
+#         scenarios.append(scenario)
+
+#     return scenarios
+
+from datetime import datetime, timedelta
+import numpy as np
+
+def create_scenarios(Ns: int, data: dict, season: str) -> list[dict[str, np.ndarray]]:
     Nt = data['Nt']
     Npoints = 8760  # Total de horas em um ano
-    base_year = 2013
-    total_years = 11  # De 2013 até 2023
+    year = 2015     # Ano fixo
+    idx = 2         # Índice do ano de 2015 no conjunto de dados
 
-    # Sorteia um único dia e hora (fixo para todos os cenários)
-    max_start_day = (Npoints - Nt) // 24
-    begin = np.random.randint(0, max_start_day) * 24
-    end = begin + Nt
+    # Mapeamento dos meses por estação (hemisfério sul)
+    season_months = {
+        'verao': [12, 1, 2],
+        'outono': [3, 4, 5],
+        'inverno': [6, 7, 8],
+        'primavera': [9, 10, 11]
+    }
+
+    if season not in season_months:
+        raise ValueError(f"Estação inválida: {season}. Use: verao, outono, inverno ou primavera.")
 
     scenarios = []
 
     for n in range(Ns):
+        mes = np.random.choice(season_months[season])
 
-        idx = np.random.choice(total_years)  # idx de 0 a 10
-        year = base_year + idx
+        hora_inicio = (datetime(year, mes, 1) - datetime(year, 1, 1)).days * 24
+        begin = hora_inicio
+        end = begin + Nt
 
-        # Data real da simulação
-        selected_date = datetime(year, 1, 1) + timedelta(hours = begin)
-        print(f"Cenário para {selected_date.strftime('%d/%m/%Y')} às {selected_date.strftime('%H:%M')}")
+        if end > Npoints:
+            begin = Npoints - Nt
+            end = Npoints
 
-        # Projeções para o ano escolhido (linha = idx)
+        selected_date_start = datetime(year, 1, 1) + timedelta(hours=begin)
+        selected_date_end = selected_date_start + timedelta(hours=Nt - 1)
+
+        print(f"Cenário {n+1} → {season.title()} (2015): início {selected_date_start.strftime('%d/%m/%Y %H:%M')} - fim {selected_date_end.strftime('%d/%m/%Y %H:%M')}\n")
+
         p_l, p_pv, p_wt, p_dl_ref, tau_pld, tau_dist, tau_dl = projections(data, begin, end, idx)
 
         scenario = {
@@ -95,11 +211,17 @@ def create_scenarios(Ns: int, data: dict) -> list[dict[str, np.ndarray]]:
             'p_dl_ref': p_dl_ref,
             'tau_pld': tau_pld,
             'tau_dist': tau_dist,
-            'tau_dl': tau_dl
+            'tau_dl': tau_dl,
+            'ano': year,
+            'mes': mes,
+            'inicio': selected_date_start,
+            'fim': selected_date_end
         }
+
         scenarios.append(scenario)
 
     return scenarios
+
 
 
 # Função para salvar os cenários em formato .pkl

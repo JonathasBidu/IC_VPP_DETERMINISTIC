@@ -104,16 +104,15 @@ def solver(data: dict):
     # termination = RobustTermination(SingleObjectiveSpaceTermination(tol = 0.1), period = 15)
     # termination = DefaultSingleObjectiveTermination(xtol = 0.01, cvtol = 0.01, ftol = 0.01, period = 15)
     # termination = SingleObjectiveSpaceTermination()
-    termination = ('n_gen', 50)
+    termination = ('n_gen', 30)
 
     res = minimize(problem,
                    algorithm,
                    termination,
                    return_least_infeasible = True,
                    seed = 1,
-                   verbose = True,
-                   progress = True
+                   verbose = True
                    )
 
 
-    return res
+    return res, algorithm

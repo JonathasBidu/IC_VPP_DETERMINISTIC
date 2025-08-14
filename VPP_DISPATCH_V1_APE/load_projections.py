@@ -118,6 +118,8 @@ if __name__ == '__main__':
     Nwt = data['Nwt']
     Ndl = data['Ndl']
 
+    a, b = 3.38, 2.5
+
     # Constantes
     Npoints = 8760  # Total de horas no ano
     base_year = 2013 # Ano base das séries históricas
@@ -140,29 +142,49 @@ if __name__ == '__main__':
     # Obtendo as projeções temporais iniciais
     p_l, p_pv, p_wt, p_dl_ref, tau_pld, tau_dist, tau_dl = projections(data, begin, end, idx)
 
+    t = np.arange(Nt)
+
     # Visualização das projeções iniciais
     # Carga NÃO despacháveis
-    for i in range(Nl):
+    # for i in range(Nl):
+    # print(p_l.shape)
+    # title = f'Carga NÃO despachável'
+    # plt.figure(figsize = (10, 5))
+    # plt.stackplot(t, p_l[0, :], p_l[1, :], p_l[2, :])
+    # plt.title(title)
+    # plt.grid(True)
+    # plt.tight_layout()
+    # plt.xlabel('Hora')
+    # plt.ylabel('Potência em p.u.')
+    # plt.show()
+    title = 'Carga NÃO despachável'
+    plt.figure(figsize=(3.38, 2.5))
+    plt.stackplot(
+    t,
+    p_l[0, :],
+    p_l[1, :],
+    p_l[2, :],
+    labels=['Carga 1', 'Carga 2', 'Carga 3'],
+    colors=['#1f77b4', '#ff7f0e', '#2ca02c']  # azul, laranja, verde
+    )
 
-        title = f'Carga NÃO despachável {i + 1}'
-        plt.figure(figsize = (10, 5))
-        plt.plot(p_l[i, :], 'r')
-        plt.title(title)
-        plt.xlabel('Hora')
-        plt.ylabel('Potência em p.u.')
-        plt.show()
+    plt.title(title, fontsize=8)
+    plt.xlabel('Hora', fontsize=8)
+    plt.ylabel('Potência (p.u.)', fontsize=8)
+    plt.legend(loc='upper right')
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
 
-    # Visualização das projeções das cargas despacháveis
-    for i in range(Ndl):
-
-        title = f'Carga despachável {i + 1}'
-        plt.figure(figsize = (10, 5))
-        plt.plot(p_dl_ref[i, :], 'k')
-        plt.title(title)
-        plt.legend(['ref', 'max', 'min'])
-        plt.xlabel('Hora')
-        plt.ylabel('Potência em p.u.')
-        plt.show()
+    # # Visualização das projeções das cargas despacháveis
+    # title = f'Carga despachável '
+    # plt.figure(figsize = (10, 5))
+    # plt.plot(p_dl_ref[i, :], 'k')
+    # plt.title(title)
+    # plt.legend(['ref', 'max', 'min'])
+    # plt.xlabel('Hora')
+    # plt.ylabel('Potência em p.u.')
+    # plt.show()
 
     # Usina solar
     for i in range(Npv):
